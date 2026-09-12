@@ -1,2 +1,12 @@
+[project]
+name = "cryptography-course-simulator"
+version = "0.1.0"
+description = "Cryptography Course Simulator Backend"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+]
+
 [tool.vercel]
 entrypoint = "backend.app.main:app"
