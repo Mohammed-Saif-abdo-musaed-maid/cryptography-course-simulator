@@ -90,5 +90,5 @@ Environment variables (see `.env.example`):
 | `APP_NAME`        | `Cryptography & Information Security Simulator` | backend |
 | `APP_VERSION`     | `1.0.0`                                    | backend  |
 | `LOG_LEVEL`       | `info`                                     | backend  |
-| `CORS_ORIGINS`    | `http://127.0.0.1:5173` + `http://localhost:5173` | backend |
+| `CORS_ORIGINS`    | *(empty — local dev origins always auto-allowed)* | backend |
 | `VITE_API_URL`    | `http://127.0.0.1:8000/api`                | frontend |

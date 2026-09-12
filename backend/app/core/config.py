@@ -5,8 +5,18 @@ Pydantic-settings validates and exposes typed configuration to the app.
 """
 
 from functools import lru_cache
+from typing import List, Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Origins always allowed so the local development workflow keeps working with
+# no extra configuration (documented in README / .env.example).
+DEV_ORIGINS = {
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+}
 
 
 class Settings(BaseSettings):
@@ -34,6 +44,20 @@ class Settings(BaseSettings):
 
     max_input_length: int = 4096
     max_math_int: int = 1_000_000_000
+
+    # Comma-separated list of allowed browser origins (production frontend,
+    # staging, etc.). Local dev origins are appended automatically.
+    cors_origins: Optional[str] = None
+
+    @property
+    def allowed_origins(self) -> List[str]:
+        """The full CORS allow-list: configured origins + local dev origins."""
+        configured = {
+            origin.strip().rstrip("/")
+            for origin in (self.cors_origins or "").split(",")
+            if origin.strip()
+        }
+        return sorted(configured | DEV_ORIGINS)
 
 
 @lru_cache

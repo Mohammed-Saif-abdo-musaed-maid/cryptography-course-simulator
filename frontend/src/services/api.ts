@@ -35,7 +35,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiClientError({
       error: 'network_error',
       message:
-        'Cannot reach the backend. Make sure the FastAPI server is running on port 8000.',
+        'Cannot reach the backend service. If you are running the app locally, make sure the FastAPI server is running (http://127.0.0.1:8000). If you are on the public site, the service may be starting up or temporarily unavailable — please try again in a moment.',
       status: 0,
     })
   }
