@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from app.algorithms import registry
-from app.utils.errors import ValidationError
+from backend.app.algorithms import registry
+from backend.app.utils.errors import ValidationError
 
 
 def _coerce_input(raw: Any, field_spec: dict) -> Any:

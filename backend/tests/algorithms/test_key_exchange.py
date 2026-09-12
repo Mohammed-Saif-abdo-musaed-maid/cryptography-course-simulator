@@ -8,8 +8,8 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PublicKey,
 )
 
-from app.algorithms import ecdh, x25519
-from app.utils.errors import ValidationError
+from backend.app.algorithms import ecdh, x25519
+from backend.app.utils.errors import ValidationError
 
 POINT_BYTES = {"p256": 65, "p384": 97, "p521": 133}
 SECRET_HEX = {"p256": 64, "p384": 96, "p521": 132}

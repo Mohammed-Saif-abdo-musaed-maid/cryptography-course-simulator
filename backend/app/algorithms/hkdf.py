@@ -20,8 +20,8 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF as _HKDF
 from cryptography.hazmat.primitives.kdf.hkdf import HKDFExpand
 from cryptography.hazmat.primitives import hmac as crypto_hmac
 
-from app.utils.errors import ValidationError
-from app.utils.steps import build_result, step
+from backend.app.utils.errors import ValidationError
+from backend.app.utils.steps import build_result, step
 
 METADATA = {
     "id": "hkdf",

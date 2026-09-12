@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.algorithms import (
+from backend.app.algorithms import (
     argon2_alg,
     bcrypt_alg,
     hkdf,
@@ -10,7 +10,7 @@ from app.algorithms import (
     pbkdf2,
     scrypt_alg,
 )
-from app.utils.errors import ValidationError
+from backend.app.utils.errors import ValidationError
 
 
 # ---------------------------------------------------------------------------

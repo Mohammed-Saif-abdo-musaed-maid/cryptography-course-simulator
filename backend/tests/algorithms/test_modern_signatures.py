@@ -3,12 +3,12 @@ OAEP / RSA-PSS additions."""
 
 import pytest
 
-from app.algorithms import (
+from backend.app.algorithms import (
     ecdsa_alg,
     ed25519_alg,
     rsa,
 )
-from app.utils.errors import AlgorithmError, ValidationError
+from backend.app.utils.errors import AlgorithmError, ValidationError
 
 UNREADABLE = "This message is only signed, never encrypted"
 

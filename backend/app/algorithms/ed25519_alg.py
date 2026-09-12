@@ -21,8 +21,8 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
     Ed25519PublicKey,
 )
 
-from app.utils.errors import ValidationError
-from app.utils.steps import build_result, step
+from backend.app.utils.errors import ValidationError
+from backend.app.utils.steps import build_result, step
 
 METADATA = {
     "id": "ed25519",

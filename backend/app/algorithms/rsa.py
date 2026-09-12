@@ -12,9 +12,9 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from app.utils.errors import MathDomainError, ValidationError
-from app.utils.math_utils import gcd, is_prime, mod_inverse, mod_inverse_steps, mod_pow, mod_pow_steps
-from app.utils.steps import build_result, step
+from backend.app.utils.errors import MathDomainError, ValidationError
+from backend.app.utils.math_utils import gcd, is_prime, mod_inverse, mod_inverse_steps, mod_pow, mod_pow_steps
+from backend.app.utils.steps import build_result, step
 
 METADATA = {
     "id": "rsa",

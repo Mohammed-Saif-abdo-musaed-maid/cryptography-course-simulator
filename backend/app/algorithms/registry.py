@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Callable, Dict, List
 
-from app.algorithms import (
+from backend.app.algorithms import (
     aes,
     aes_gcm,
     argon2_alg,

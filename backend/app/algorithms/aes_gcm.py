@@ -20,8 +20,8 @@ from typing import Optional
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM as _AESGCM
 
-from app.utils.errors import ValidationError
-from app.utils.steps import build_result, step
+from backend.app.utils.errors import ValidationError
+from backend.app.utils.steps import build_result, step
 
 METADATA = {
     "id": "aes_gcm",

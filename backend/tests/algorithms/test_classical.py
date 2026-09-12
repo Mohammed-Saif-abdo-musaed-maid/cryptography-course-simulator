@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.algorithms import (
+from backend.app.algorithms import (
     caesar,
     columnar,
     hill,
@@ -11,7 +11,7 @@ from app.algorithms import (
     rail_fence,
     vigenere,
 )
-from app.utils.errors import AlgorithmError
+from backend.app.utils.errors import AlgorithmError
 
 
 # ---------------------------------------------------------------------------

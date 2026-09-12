@@ -15,8 +15,8 @@ from typing import Optional
 
 import bcrypt as bcrypt_lib
 
-from app.utils.errors import ValidationError
-from app.utils.steps import build_result, step
+from backend.app.utils.errors import ValidationError
+from backend.app.utils.steps import build_result, step
 
 METADATA = {
     "id": "bcrypt",

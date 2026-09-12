@@ -2,8 +2,8 @@
 
 import pytest
 
-from app.algorithms import aes_gcm, chacha20_poly1305
-from app.utils.errors import ValidationError
+from backend.app.algorithms import aes_gcm, chacha20_poly1305
+from backend.app.utils.errors import ValidationError
 
 KEY_128 = "00" * 16
 KEY_256 = "aa" * 32

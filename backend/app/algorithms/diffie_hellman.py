@@ -13,9 +13,9 @@ from __future__ import annotations
 
 from typing import Optional
 
-from app.utils.errors import MathDomainError, ValidationError
-from app.utils.math_utils import is_prime, mod_pow, mod_pow_steps
-from app.utils.steps import build_result, step
+from backend.app.utils.errors import MathDomainError, ValidationError
+from backend.app.utils.math_utils import is_prime, mod_pow, mod_pow_steps
+from backend.app.utils.steps import build_result, step
 
 METADATA = {
     "id": "diffie_hellman",

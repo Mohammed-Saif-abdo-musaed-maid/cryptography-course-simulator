@@ -24,7 +24,7 @@ from pathlib import Path
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND_DIR))
 
-from app.services.algorithm_service import execute  # noqa: E402
+from backend.app.services.algorithm_service import execute  # noqa: E402
 
 # Canonical requests (operation + inputs mirroring the frontend demo inputs).
 CANONICAL: dict[str, dict] = {

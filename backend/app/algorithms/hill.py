@@ -13,9 +13,9 @@ from __future__ import annotations
 
 from typing import List, Sequence
 
-from app.utils.errors import MatrixError, ValidationError
-from app.utils.math_utils import gcd, mod_inverse
-from app.utils.steps import build_result, step
+from backend.app.utils.errors import MatrixError, ValidationError
+from backend.app.utils.math_utils import gcd, mod_inverse
+from backend.app.utils.steps import build_result, step
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 ALPHABET_SIZE = 26

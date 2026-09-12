@@ -16,8 +16,8 @@ from typing import Optional
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, hmac as crypto_hmac
 
-from app.utils.errors import ValidationError
-from app.utils.steps import build_result, step
+from backend.app.utils.errors import ValidationError
+from backend.app.utils.steps import build_result, step
 
 METADATA = {
     "id": "hmac",

@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from typing import List, Tuple
 
-from app.utils.errors import ValidationError
-from app.utils.steps import build_result, step
+from backend.app.utils.errors import ValidationError
+from backend.app.utils.steps import build_result, step
 
 ALPHABET = "ABCDEFGHIKLMNOPQRSTUVWXYZ"  # no J
 

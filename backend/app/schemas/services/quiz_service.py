@@ -10,7 +10,7 @@ from __future__ import annotations
 import random
 from typing import Any, Dict, List
 
-from app.utils.errors import ValidationError
+from backend.app.utils.errors import ValidationError
 
 QUIZ_QUESTIONS: List[dict] = [
     # -- Classical -----------------------------------------------------------

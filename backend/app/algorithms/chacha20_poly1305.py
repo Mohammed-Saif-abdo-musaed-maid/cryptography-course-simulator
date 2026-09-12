@@ -18,8 +18,8 @@ from cryptography.hazmat.primitives.ciphers.aead import (
     ChaCha20Poly1305 as _ChaCha20Poly1305,
 )
 
-from app.utils.errors import ValidationError
-from app.utils.steps import build_result, step
+from backend.app.utils.errors import ValidationError
+from backend.app.utils.steps import build_result, step
 
 METADATA = {
     "id": "chacha20_poly1305",

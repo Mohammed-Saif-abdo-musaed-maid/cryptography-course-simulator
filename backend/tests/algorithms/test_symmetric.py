@@ -3,8 +3,8 @@ known FIPS/NIST/RFC/official vectors."""
 
 import pytest
 
-from app.algorithms import aes, blowfish, chacha20, des, triple_des, twofish
-from app.utils.errors import AlgorithmError
+from backend.app.algorithms import aes, blowfish, chacha20, des, triple_des, twofish
+from backend.app.utils.errors import AlgorithmError
 
 # ---------------------------------------------------------------------------
 # DES

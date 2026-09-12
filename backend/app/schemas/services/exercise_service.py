@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
-from app.algorithms import caesar, columnar, hill, monoalphabetic, playfair, rail_fence, rsa, vigenere
-from app.utils.errors import ValidationError
+from backend.app.algorithms import caesar, columnar, hill, monoalphabetic, playfair, rail_fence, rsa, vigenere
+from backend.app.utils.errors import ValidationError
 
 EXERCISES: List[dict] = [
     {

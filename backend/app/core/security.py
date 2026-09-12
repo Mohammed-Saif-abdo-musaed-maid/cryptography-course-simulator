@@ -5,7 +5,7 @@ safe request limits and sanitisation. Passwords, secrets or user data are
 never persisted. No environment secrets are used by the simulator.
 """
 
-from app.core.config import settings
+from backend.app.core.config import settings
 
 
 def validate_input_length(value: str, field: str = "input") -> None:

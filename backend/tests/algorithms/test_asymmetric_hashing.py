@@ -4,7 +4,7 @@ import hashlib
 
 import pytest
 
-from app.algorithms import (
+from backend.app.algorithms import (
     blake2,
     blake3,
     diffie_hellman,
@@ -16,7 +16,7 @@ from app.algorithms import (
     sha3,
     sha512,
 )
-from app.utils.errors import AlgorithmError
+from backend.app.utils.errors import AlgorithmError
 
 
 # ---------------------------------------------------------------------------

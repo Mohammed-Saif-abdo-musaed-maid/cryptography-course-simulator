@@ -16,10 +16,10 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Query
 
-from app.core.config import settings
-from app.schemas.api import AlgorithmRequest, ErrorResponse, HealthResponse
-from app.services import algorithm_service, exercise_service, math_service, quiz_service
-from app.utils.errors import ValidationError
+from backend.app.core.config import settings
+from backend.app.schemas.api import AlgorithmRequest, ErrorResponse, HealthResponse
+from backend.app.services import algorithm_service, exercise_service, math_service, quiz_service
+from backend.app.utils.errors import ValidationError
 
 router = APIRouter()
 

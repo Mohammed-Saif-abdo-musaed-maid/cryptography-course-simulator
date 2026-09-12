@@ -13,9 +13,9 @@ from __future__ import annotations
 
 from typing import Optional
 
-from app.algorithms import des as des_module
-from app.utils.errors import ValidationError
-from app.utils.steps import build_result, step
+from backend.app.algorithms import des as des_module
+from backend.app.utils.errors import ValidationError
+from backend.app.utils.steps import build_result, step
 
 METADATA = {
     "id": "triple_des",
