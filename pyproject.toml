@@ -5,7 +5,8 @@ description = "Cryptography Course Simulator Backend"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi",
-    "uvicorn"
+    "uvicorn",
+    "pydantic-settings"
 ]
 
 [tool.vercel]
