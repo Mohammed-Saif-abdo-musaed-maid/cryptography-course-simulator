@@ -1,0 +1,31 @@
+name: crypto-course
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: crypto-backend
+    ports:
+      - "8000:8000"
+    environment:
+      BACKEND_HOST: 0.0.0.0
+      BACKEND_PORT: 8000
+      LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    container_name: crypto-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://127.0.0.1:8000/api
+    depends_on:
+      - backend

@@ -1,0 +1,1 @@
+import{u as n,j as s}from"./index-Bdc5hhzE.js";function o({status:e}){const{t:a}=n();if(!e)return null;const t=a(`status.${e}`);return s.jsx("span",{className:`badge badge-${e}`,children:t})}function u({category:e}){const{t:a}=n();return e?s.jsx("span",{className:"badge badge-category",children:a(`category.${e}`)}):null}export{u as C,o as S};

@@ -1,0 +1,428 @@
+/* ---------------------------------------------------------------------------
+   3D Simulation (WebGL) — additive to the existing lab components.
+   All colors come from the shared design tokens in theme.css.
+   -------------------------------------------------------------------------- */
+.sim3d-root {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Body: 3D stage + side panel ------------------------------------------ */
+.sim3d-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 288px;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.sim3d-main {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* WebGL stage ----------------------------------------------------------- */
+.sim3d-canvas {
+  position: relative;
+  width: 100%;
+  height: clamp(360px, 56vh, 560px);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, var(--simulation-surface), transparent 60%),
+    var(--bg-deep);
+  overflow: hidden;
+}
+.sim3d-canvas:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Timeline (reuses the 2D lab-chip look) -------------------------------- */
+.sim3d-timeline {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px 4px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.sim3d-timeline-progress {
+  position: absolute;
+  top: 15px;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background: var(--progress-track);
+  pointer-events: none;
+  transition: width 0.25s ease;
+}
+.sim3d-chip {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: var(--r-full);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-family: var(--font-fixed);
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+}
+.sim3d-chip:hover {
+  transform: translateY(-1px);
+  border-color: var(--primary);
+}
+.sim3d-chip.is-active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #06101f;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+.sim3d-chip.is-done {
+  border-color: var(--success);
+  color: var(--success);
+}
+.sim3d-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.sim3d-chip-dot.phase-input {
+  background: var(--simulation-input);
+}
+.sim3d-chip-dot.phase-key {
+  background: var(--simulation-key);
+}
+.sim3d-chip-dot.phase-internal {
+  background: var(--cyan);
+}
+.sim3d-chip-dot.phase-transform {
+  background: var(--simulation-transform);
+}
+.sim3d-chip-dot.phase-output {
+  background: var(--simulation-output);
+}
+.sim3d-chip-num {
+  line-height: 1;
+}
+
+/* Controls -------------------------------------------------------------- */
+.sim3d-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sim3d-camera-btn {
+  margin-inline-start: auto;
+}
+
+/* Legend ---------------------------------------------------------------- */
+.sim3d-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: center;
+  padding: 0 4px;
+}
+.sim3d-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+.sim3d-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--text-faint);
+  flex-shrink: 0;
+}
+.sim3d-swatch-input {
+  background: var(--simulation-input);
+}
+.sim3d-swatch-plaintext {
+  background: var(--simulation-plaintext);
+}
+.sim3d-swatch-key {
+  background: var(--simulation-key);
+}
+.sim3d-swatch-path {
+  background: var(--primary);
+}
+.sim3d-swatch-transform {
+  background: var(--simulation-transform);
+}
+.sim3d-swatch-active {
+  background: var(--simulation-active);
+}
+.sim3d-swatch-complete {
+  background: var(--simulation-complete);
+}
+.sim3d-swatch-output {
+  background: var(--simulation-output);
+}
+.sim3d-swatch-muted {
+  background: var(--text-faint);
+}
+
+/* Status hints ---------------------------------------------------------- */
+.sim3d-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+  padding: 0 4px;
+}
+.sim3d-kbd-hint {
+  font-family: var(--font-fixed);
+}
+
+/* Side panel ------------------------------------------------------------ */
+.sim3d-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--simulation-surface-strong);
+  align-self: stretch;
+}
+.sim3d-panel-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.sim3d-panel-count {
+  color: var(--text-muted);
+}
+.sim3d-panel-title {
+  margin: 0;
+  font-size: var(--fs-lg);
+  color: var(--text-strong);
+  line-height: 1.3;
+}
+.sim3d-panel-label {
+  margin: 0;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+}
+.sim3d-panel-desc {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* Step inspector (semantic event metadata) ------------------------------- */
+.sim3d-inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.sim3d-inspector-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sim3d-inspector-label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  cursor: default;
+}
+.sim3d-event {
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--simulation-transform-bg, transparent);
+  color: var(--transform-fg, var(--primary));
+  border: 1px solid currentColor;
+}
+.sim3d-op {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+.sim3d-level {
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+.sim3d-inspector-formula {
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--primary);
+  background: var(--simulation-surface, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 6px 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.sim3d-inspector-why {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  color: var(--text-muted);
+  border-left: 3px solid var(--primary);
+  padding-left: 8px;
+}
+
+/* Value changes table ---------------------------------------------------- */
+.sim3d-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sim3d-changes-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-xs);
+}
+.sim3d-changes-table td {
+  padding: 3px 5px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border);
+}
+.sim3d-entity {
+  color: var(--text-strong);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.sim3d-before {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--error, #c0392b);
+  opacity: 0.85;
+}
+.sim3d-arrow {
+  color: var(--text-faint);
+  text-align: center;
+}
+.sim3d-after {
+  color: var(--output-fg, var(--green, #27ae60));
+  font-weight: 700;
+}
+.sim3d-reason {
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+/* Inputs / outputs / state KV grids -------------------------------------- */
+.sim3d-inspector-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sim3d-kv {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sim3d-kv-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: var(--fs-xs);
+}
+.sim3d-kv-key {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.sim3d-kv-val {
+  color: var(--text-strong);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.sim3d-inspector-state {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sim3d-inspector-state summary {
+  list-style: none;
+}
+.sim3d-inspector-state summary::-webkit-details-marker {
+  display: none;
+}
+.sim3d-inspector-state-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.sim3d-state-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.sim3d-state-cap {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+/* Fallbacks ------------------------------------------------------------- */
+.sim3d-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 260px;
+  text-align: center;
+  padding: 24px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-lg);
+  background: var(--simulation-surface);
+}
+.sim3d-fallback-title {
+  margin: 0;
+  font-size: var(--fs-lg);
+  color: var(--text-strong);
+}
+
+/* Responsive ------------------------------------------------------------ */
+@media (max-width: 860px) {
+  .sim3d-body {
+    grid-template-columns: 1fr;
+  }
+  .sim3d-panel {
+    align-self: auto;
+  }
+}
