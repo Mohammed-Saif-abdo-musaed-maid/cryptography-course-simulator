@@ -125,3 +125,4 @@ All cryptographic material here is for **education**. Deprecated algorithms
 (DES, 3DES) are marked as such; MD5 and SHA-1 are marked **broken** and must not
 be used to protect real data; RSA and ElGamal are textbook implementations and
 MUST NOT be used to protect real data without proper padding (OAEP etc.).
+# cryptography-course-simulator
