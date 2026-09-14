@@ -9,6 +9,31 @@ npm-debug.log*
 
 # ---- Python / backend ----
 __pycache__/
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
 *.pyc
 *.pyo
 .venv/
