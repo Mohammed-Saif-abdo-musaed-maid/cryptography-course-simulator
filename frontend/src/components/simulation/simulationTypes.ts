@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import type { AlgorithmResult } from '../../types'
+import type { AlgorithmResult, StepDetail } from '../../types'
 
 export type SimPhase = 'input' | 'transform' | 'internal' | 'key' | 'output'
 
@@ -14,6 +14,8 @@ export interface SimStage {
   descArgs?: Record<string, string | number>
   phase?: SimPhase
   view: SimView
+  /** 1-based index of the backend trace step this stage corresponds to. */
+  traceIndex?: number
 }
 
 export interface SimulationContext {
@@ -26,6 +28,8 @@ export interface SimulationContext {
   theme: 'dark' | 'light'
   result: AlgorithmResult | null
   resultMatches: boolean
+  /** The real backend execution trace (result.steps) shown in the step panel. */
+  trace: StepDetail[]
   t: (key: string) => string
 }
 

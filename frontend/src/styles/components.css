@@ -1507,3 +1507,317 @@
 :lang(ar) .lab-badge {
   unicode-bidi: plaintext;
 }
+
+/* ============================================================================
+   Laboratory panels (Phase 3) — file / signature / hash / MAC / hybrid labs.
+   Additive: uses only existing theme tokens, works in light and dark mode.
+   ========================================================================== */
+
+.lab-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.lab-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-block-end: 12px;
+}
+.lab-toggle label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.lab-inline-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+.lab-inline-field select {
+  min-width: 96px;
+}
+
+.lab-keys-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-block-end: 12px;
+}
+
+.lab-key {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.lab-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 84px;
+  padding: 10px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-strong);
+  font-family: var(--font-fixed);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.lab-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 18px;
+  border: 2px dashed var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.lab-dropzone:hover,
+.lab-dropzone:focus-visible {
+  border-color: var(--primary);
+  outline: none;
+}
+.lab-dropzone.is-dragging {
+  border-color: var(--primary);
+  background: var(--surface-3);
+}
+.lab-dropzone.is-error {
+  border-color: var(--danger);
+}
+.lab-file-input {
+  display: none;
+}
+.lab-dropzone-file,
+.lab-dropzone-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lab-file-name {
+  font-family: var(--font-fixed);
+  color: var(--text-strong);
+  overflow-wrap: anywhere;
+}
+.lab-file-meta,
+.lab-dropzone-hint {
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+}
+.lab-dropzone-title {
+  font-weight: 600;
+  color: var(--text-strong);
+}
+.lab-dropzone-actions {
+  margin-top: 4px;
+}
+
+.lab-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lab-result-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+.lab-result-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 200px) 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.lab-result-row dt {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+.lab-result-row dd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-strong);
+  overflow-wrap: anywhere;
+}
+.lab-result-value {
+  overflow-wrap: anywhere;
+}
+.lab-result-actions {
+  display: flex;
+  gap: 8px;
+}
+.lab-timing {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+}
+
+.hybrid-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.hybrid-flow + .hybrid-flow {
+  margin-top: 8px;
+}
+.hybrid-flow-node {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+}
+.hybrid-flow-key .hybrid-flow-node {
+  border-style: dashed;
+}
+.hybrid-flow-arrow {
+  color: var(--text-faint);
+}
+
+/* ============================================================================
+   Certificate / PKI panel (Phase 4) — additive, theme-token based.
+   ========================================================================== */
+
+.lab-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.lab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block-start: 4px;
+}
+
+.lab-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.lab-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+
+.lab-learn {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+.lab-learn-item {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}
+
+.lab-mode-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lab-mode {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.lab-mode:hover {
+  border-color: var(--primary);
+}
+.lab-mode.is-active {
+  border-color: var(--primary);
+  background: var(--surface-3);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.lab-checks {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lab-checks li {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) 1.6fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  font-size: var(--fs-sm);
+}
+.lab-checks li.is-pass {
+  border-inline-start: 3px solid var(--success);
+}
+.lab-checks li.is-fail {
+  border-inline-start: 3px solid var(--danger);
+}
+.lab-check-detail {
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.lab-check-state {
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.pki-chain {
+  margin: 8px 0 0;
+  padding-inline-start: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+}
+.pki-chain .badge {
+  margin-inline-start: 8px;
+}
+
+@media (max-width: 640px) {
+  .lab-result-row {
+    grid-template-columns: 1fr;
+  }
+  .lab-checks li {
+    grid-template-columns: 1fr;
+  }
+}

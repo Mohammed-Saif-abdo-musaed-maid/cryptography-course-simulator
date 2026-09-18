@@ -184,6 +184,66 @@ const THEORY: Record<string, string[]> = {
     'Deterministic means the same message always produces the same 64-byte signature — no random nonce, so no nonce-reuse attacks.',
     'Fast, side-channel resistant, and used in SSH, TLS and many blockchains. Signs, does not encrypt.',
   ],
+  sha224: [
+    'SHA-224 is the 224-bit member of the SHA-2 family (FIPS 180-4): a truncated SHA-256 with a distinct initial value.',
+    'Input is padded to 512-bit blocks and processed by the same 64-round compression function over 32-bit words, but only the first 7 state words are emitted as the digest.',
+    'Because the initial state differs from SHA-256, SHA-224 is not simply a truncated SHA-256 output. No practical preimage or collision attacks are known.',
+  ],
+  sha384: [
+    'SHA-384 is a SHA-2 variant with 64-bit words that produces a 384-bit digest by truncating the full SHA-512 state to its first 6 words.',
+    'Message blocks are 1024 bits and the compression function runs 80 rounds; the initial words are the SHA-512 IV, not a SHA-256-derived state.',
+    'No feasible attacks exist. Its 48-byte output keeps an accident-resistant margin in high-assurance settings such as HSMs and record-protection schemes.',
+  ],
+  ripemd160: [
+    'RIPEMD-160 is a 160-bit hash designed by the European RIPE project (1992–1996) as an independent, non-US alternative to SHA-1.',
+    'It processes 512-bit blocks in 5 rounds of 16 steps over two parallel compression lines (left and right) that are combined at the end — a dual-line structure.',
+    'Its 160-bit output lives on in Bitcoin addresses. Today it is legacy: prefer SHA-256 or SHA-3. The simulator runs the real hashlib implementation.',
+  ],
+  aes_cbc: [
+    'CBC chains every 128-bit block into the previous ciphertext block: Cᵢ = E_K(Pᵢ ⊕ Cᵢ₋₁) with C₀ = the IV.',
+    'Because the last block is padded with PKCS#7, equal plaintext blocks never produce equal ciphertext blocks under a fixed key.',
+    'But CBC is malleable and unauthenticated — flipping a ciphertext bit flips the same bit in the next plaintext block. Always add a MAC (Encrypt-then-MAC) or use an AEAD mode such as AES-GCM/CCM.',
+  ],
+  aes_ctr: [
+    'CTR turns the AES block cipher into a stream cipher: keystream block i is E_K(counter-block + i), giving Cᵢ = Pᵢ ⊕ keystreamᵢ.',
+    'Encryption and decryption are the identical XOR operation, and blocks can be processed in parallel or randomly accessed.',
+    'The counter block MUST NEVER repeat under the same key — one reuse lets an attacker recover both messages from their XOR.',
+  ],
+  aes_ccm: [
+    'AES-CCM (NIST SP 800-38C) is authenticated encryption: CTR-mode encryption combined with a CBC-MAC so the same key gives both confidentiality and a 128-bit integrity tag.',
+    'A 7–13-byte nonce counts the CTR blocks and seeds the CBC-MAC, which also authenticates the optional AAD; the tag may be truncated.',
+    'Decryption verifies the tag BEFORE releasing plaintext — a modified tag, AAD, ciphertext or wrong key fails and returns nothing. The nonce must be unique per key.',
+  ],
+  camellia: [
+    'Camellia (RFC 3713) is a 128-bit Feistel-style block cipher with 18 rounds for 128-bit keys and 24 rounds for 192/256-bit keys.',
+    'Each round uses the four S-boxes S1–S4 and a P-layer over GF(2⁸); an FL/FL⁻¹ layer is inserted every 6 rounds, and the key schedule is built from a 128/192/256-bit master key.',
+    'Endorsed by NESSIE and CRYPTREC and deployed in TLS and IPSec; no practical attacks are known. This page encrypts and decrypts a single block.',
+  ],
+  cmac: [
+    'CMAC (NIST SP 800-38B) is a Message Authentication Code built from AES in CBC mode, replacing the insecure raw CBC-MAC.',
+    'Two subkeys K1 and K2 are derived by doubling the encryption of the all-zero block in GF(2¹²⁸); the final block is XORed with K1 when full, or with K2 after 0x80-padding.',
+    'That subkey masking closes the length-extension weakness of CBC-MAC. The tag proves integrity and authenticity for holders of the shared key but hides nothing.',
+  ],
+  poly1305: [
+    'Poly1305 (Daniel J. Bernstein, 2005) computes a 128-bit tag by evaluating a polynomial over the prime field 2¹³⁰ − 5 and adding a clamped secret s.',
+    'The 32-byte key is split r ‖ s; r is clamped into 130 bits and tag = ((Σ ᵢ mᵢ·rⁱ mod 2¹³⁰−5) + s) mod 2¹²⁸.',
+    'Every key authenticates exactly ONE message — key reuse enables instant forgery. That is why ChaCha20-Poly1305 derives a fresh Poly1305 key from 32 keystream bytes per message.',
+  ],
+  x448: [
+    'X448 (RFC 7748) is elliptic-curve Diffie–Hellman over Curve448 using only x-coordinates, targeting ≈224-bit security.',
+    'Each party multiplies the peer x-coordinate by its secret scalar: s = X448(a, B) = X448(b, A) — both sides derive the same 56-byte secret.',
+    'Keys are always exactly 56 bytes. Like all DH, X448 provides a shared secret but NO authentication — layer signatures or pre-shared keys on top.',
+  ],
+  dsa: [
+    'DSA (FIPS 186) produces a signature (r, s) using discrete logarithms in a subgroup of size q of the multiplicative group mod p.',
+    'With domain parameters (p, q, g) and private scalar x: r = (gᵏ mod p) mod q and s = k⁻¹(H(m) + x·r) mod q, where k is a fresh random per message.',
+    'Reusing or predicting k leaks the private key outright. Verification recomputes v from the public key and accepts only genuine signatures. DSA authenticates, it does not encrypt.',
+  ],
+  rsa_pss: [
+    'RSA-PSS (PKCS#1 v2) is a probabilistic signature scheme: the digest is wrapped in a masked random-salt encoding before the private exponentiation.',
+    'Because of the salt, the same message signs to a different signature on every run — and the construction is provably secure (Bellare–Rogaway), resisting multiplicative forgeries that break raw RSA.',
+    'Verification re-masks the encoding and re-checks the hash plus padding trailer. Its signature size equals the modulus length (e.g. 256 bytes for 2048-bit RSA).',
+  ],
 }
 
 export function TheoryTab({ id }: { id: string }) {

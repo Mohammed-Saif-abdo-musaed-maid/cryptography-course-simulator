@@ -20,11 +20,11 @@ class TestHealth:
 
 
 class TestCatalog:
-    def test_catalog_has_35_algorithms(self):
+    def test_catalog_has_47_algorithms(self):
         response = client.get("/api/algorithms")
         assert response.status_code == 200
         body = response.json()
-        assert len(body["algorithms"]) == 35
+        assert len(body["algorithms"]) == 47
         ids = {a["id"] for a in body["algorithms"]}
         expected = {"caesar", "vigenere", "playfair", "hill", "rail_fence",
                     "columnar", "monoalphabetic", "des", "aes", "triple_des",
@@ -33,21 +33,25 @@ class TestCatalog:
                     "sha1", "md5", "sha3", "blake2", "blake3",
                     "aes_gcm", "chacha20_poly1305", "hmac", "pbkdf2",
                     "bcrypt", "scrypt", "argon2", "hkdf", "ecdh", "x25519",
-                    "ecdsa", "ed25519"}
+                    "ecdsa", "ed25519",
+                    # Phase 5 additions.
+                    "aes_cbc", "aes_ctr", "aes_ccm", "camellia", "cmac",
+                    "poly1305", "x448", "dsa", "rsa_pss",
+                    "sha224", "sha384", "ripemd160"}
         assert ids == expected
 
     def test_categories_summary(self):
         body = client.get("/api/algorithms").json()["categories"]
-        assert body["total"] == 35
+        assert body["total"] == 47
         assert body["classical"] == 7
-        assert body["symmetric"] == 6
+        assert body["symmetric"] == 9
         assert body["asymmetric"] == 2
-        assert body["key_exchange"] == 3
-        assert body["hashing"] == 7
-        assert body["mac"] == 1
+        assert body["key_exchange"] == 4
+        assert body["hashing"] == 10
+        assert body["mac"] == 3
         assert body["kdf"] == 5
-        assert body["aead"] == 2
-        assert body["signature"] == 2
+        assert body["aead"] == 3
+        assert body["signature"] == 4
 
     def test_algorithm_detail(self):
         response = client.get("/api/algorithms/aes")

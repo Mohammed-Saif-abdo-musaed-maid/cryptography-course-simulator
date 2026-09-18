@@ -9,7 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.app.api.routes import api
+from backend.app.api.routes import api, lab_api
 from backend.app.core.config import settings
 from backend.app.core.logging import get_logger
 from backend.app.utils.errors import AlgorithmError
@@ -34,6 +34,7 @@ app.add_middleware(
 )
 
 app.include_router(api.router, prefix="/api")
+app.include_router(lab_api.router, prefix="/api/lab")
 
 
 @app.exception_handler(AlgorithmError)

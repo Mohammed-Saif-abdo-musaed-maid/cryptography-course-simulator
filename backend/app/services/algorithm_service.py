@@ -170,6 +170,39 @@ def execute(algorithm_id: str, operation: str,
         "sha3": {"message": "message", "variant": "variant"},
         "blake2": {"message": "message", "variant": "variant"},
         "blake3": {"message": "message", "length": "length"},
+        "sha224": {"message": "message"},
+        "sha384": {"message": "message"},
+        "ripemd160": {"message": "message"},
+        "aes_cbc": {"plaintext": "plaintext" if operation == "encrypt" else None,
+                    "ciphertext_hex": "ciphertext_hex" if operation == "decrypt" else None,
+                    "key_hex": "key_hex", "iv_hex": "iv_hex"},
+        "aes_ctr": {"plaintext": "plaintext" if operation == "encrypt" else None,
+                    "ciphertext_hex": "ciphertext_hex" if operation == "decrypt" else None,
+                    "key_hex": "key_hex", "counter_hex": "counter_hex"},
+        "aes_ccm": {"plaintext": "plaintext" if operation == "encrypt" else None,
+                    "ciphertext_hex": "ciphertext_hex" if operation == "decrypt" else None,
+                    "key_hex": "key_hex", "nonce_hex": "nonce_hex",
+                    "aad": "aad", "tag_length": "tag_length"},
+        "camellia": {"block": "hex_block", "key": "hex_key"},
+        "cmac": {"message": "message", "key_hex": "key_hex",
+                 "output_format": "output_format",
+                 "mac": "mac" if operation == "verify" else None},
+        "poly1305": {"message": "message", "key_hex": "key_hex",
+                     "output_format": "output_format",
+                     "mac": "mac" if operation == "verify" else None},
+        "x448": {},
+        "dsa": {"message": "message" if operation in ("sign", "verify") else None,
+                "hash_algorithm": "hash_algorithm" if operation in ("sign", "verify") else None,
+                "key_size": "key_size" if operation in ("sign", "generate_keys") else None,
+                "signature_hex": "signature_hex" if operation == "verify" else None,
+                "private_key_pem": "private_key_pem" if operation == "sign" else None,
+                "public_key_pem": "public_key_pem" if operation == "verify" else None},
+        "rsa_pss": {"message": "message" if operation in ("sign", "verify") else None,
+                    "hash_algorithm": "hash_algorithm" if operation in ("sign", "verify") else None,
+                    "key_size": "key_size" if operation in ("sign", "generate_keys") else None,
+                    "signature_hex": "signature_hex" if operation == "verify" else None,
+                    "private_key_pem": "private_key_pem" if operation == "sign" else None,
+                    "public_key_pem": "public_key_pem" if operation == "verify" else None},
     }.get(algorithm_id, {})
 
     # Special operations that have their own signature.
@@ -191,6 +224,12 @@ def execute(algorithm_id: str, operation: str,
             }
         ),
         ("ed25519", "generate_keys"): lambda: module.generate_keys(),
+        ("dsa", "generate_keys"): lambda: module.generate_keys(
+            **_coerce_key_params(algorithm_id, inputs, mapping)
+        ),
+        ("rsa_pss", "generate_keys"): lambda: module.generate_keys(
+            **_coerce_key_params(algorithm_id, inputs, mapping)
+        ),
     }
 
     if (algorithm_id, operation) in special:
@@ -298,4 +337,5 @@ def get_algorithm_detail(algorithm_id: str) -> dict:
              "reversible", "key_kind", "block_size", "description", "formula")} | {
         "id": algorithm_id,
         "category_label": registry.CATEGORY_LABELS[info["category"]],
+        "capabilities": registry.get_capabilities(algorithm_id),
     }

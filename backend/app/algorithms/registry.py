@@ -12,6 +12,9 @@ from typing import Callable, Dict, List
 
 from backend.app.algorithms import (
     aes,
+    aes_cbc,
+    aes_ccm,
+    aes_ctr,
     aes_gcm,
     argon2_alg,
     bcrypt_alg,
@@ -19,11 +22,14 @@ from backend.app.algorithms import (
     blake3,
     blowfish,
     caesar,
+    camellia,
     chacha20,
     chacha20_poly1305,
+    cmac_alg,
     columnar,
     des,
     diffie_hellman,
+    dsa_alg,
     ecdh,
     ecdsa_alg,
     ed25519_alg,
@@ -35,17 +41,23 @@ from backend.app.algorithms import (
     monoalphabetic,
     pbkdf2,
     playfair,
+    poly1305_alg,
     rail_fence,
+    ripemd160,
     rsa,
+    rsa_pss_alg,
     scrypt_alg,
     sha1,
+    sha224,
     sha256,
+    sha384,
     sha3,
     sha512,
     triple_des,
     twofish,
     vigenere,
     x25519,
+    x448,
 )
 
 CATEGORY_LABELS = {
@@ -63,6 +75,110 @@ CATEGORY_LABELS = {
 
 def _fields(specs: List[dict]) -> List[dict]:
     return specs
+
+
+# ---------------------------------------------------------------------------
+# Capability model (additive).
+#
+# Declares, per algorithm, WHAT it can do. It complements -- and never
+# replaces -- "operations": operations stay the single source of truth for
+# execute() dispatch; capabilities are metadata for the UI (dynamic tabs,
+# badges, feature gating). Files/bytes-related flags below reflect the ACTUAL
+# backend implementations:
+#   * "cryptography"-library AEAD modules (aes_gcm, chacha20_poly1305) are
+#     bytes-safe and back the future File Lab.
+#   * Ed25519 / ECDSA / RSA delegates signing to the "cryptography" library,
+#     so byte-level (file) signing is truthful for them.
+#   * The pure-python/educational block & classical modules are NOT assumed
+#     binary-safe: they deliberately get no file capability.
+#   * RSA gets hybridEncryption because its OAEP modes exist and are the
+#     planned key-wrapping mechanism (it does NOT encrypt files directly).
+# ---------------------------------------------------------------------------
+
+CAPABILITY_KEYS: List[str] = [
+    "textEncryption",
+    "textDecryption",
+    "fileEncryption",
+    "fileDecryption",
+    "digitalSignature",
+    "signatureVerification",
+    "fileSignature",
+    "fileSignatureVerification",
+    "hashing",
+    "fileHashing",
+    "integrityVerification",
+    "mac",
+    "macVerification",
+    "keyExchange",
+    "keyDerivation",
+    "hybridEncryption",
+    "digitalCertificate",
+    "certificateAuthority",
+]
+
+
+def _caps(**flags: bool) -> Dict[str, bool]:
+    """Build an all-false capability map with the given flags enabled."""
+    return {key: bool(flags.get(key, False)) for key in CAPABILITY_KEYS}
+
+
+CAPABILITIES: Dict[str, Dict[str, bool]] = {
+    # Classical educational ciphers: text-only, historical, not binary-safe.
+    **{alg: _caps(textEncryption=True, textDecryption=True)
+       for alg in ("caesar", "monoalphabetic", "vigenere", "playfair",
+                   "hill", "rail_fence", "columnar")},
+    # Educational symmetric block/stream modules (hex-block based): text-only.
+    # Their implementations are NOT safe for arbitrary binary bytes.
+    # aes_cbc/aes_ctr/camellia are included here: the modules accept text and
+    # the block helpers only operate on hex, so no file (bytes) capability.
+    **{alg: _caps(textEncryption=True, textDecryption=True)
+       for alg in ("des", "triple_des", "aes", "blowfish", "twofish",
+                   "chacha20", "camellia", "aes_cbc", "aes_ctr")},
+    # Authenticated encryption backed by the "cryptography" library's
+    # bytes-safe AEAD primitives: File Lab building blocks.
+    "aes_gcm": _caps(textEncryption=True, textDecryption=True,
+                     fileEncryption=True, fileDecryption=True),
+    "aes_ccm": _caps(textEncryption=True, textDecryption=True,
+                     fileEncryption=True, fileDecryption=True),
+    "chacha20_poly1305": _caps(textEncryption=True, textDecryption=True,
+                               fileEncryption=True, fileDecryption=True),
+    "hmac": _caps(mac=True, macVerification=True),
+    "cmac": _caps(mac=True, macVerification=True),
+    "poly1305": _caps(mac=True, macVerification=True),
+    "pbkdf2": _caps(keyDerivation=True),
+    "bcrypt": _caps(keyDerivation=True),
+    "scrypt": _caps(keyDerivation=True),
+    "argon2": _caps(keyDerivation=True),
+    "hkdf": _caps(keyDerivation=True),
+    "ecdh": _caps(keyExchange=True),
+    "x25519": _caps(keyExchange=True),
+    "x448": _caps(keyExchange=True),
+    "diffie_hellman": _caps(keyExchange=True),
+    "ecdsa": _caps(digitalSignature=True, signatureVerification=True,
+                   fileSignature=True, fileSignatureVerification=True,
+                   digitalCertificate=True, certificateAuthority=True),
+    "ed25519": _caps(digitalSignature=True, signatureVerification=True,
+                     fileSignature=True, fileSignatureVerification=True,
+                     digitalCertificate=True, certificateAuthority=True),
+    # DSA / RSA-PSS sign text (PEM keys, UTF-8 message) but expose no file
+    # signing flag because their modules are not byte/file oriented.
+    "dsa": _caps(digitalSignature=True, signatureVerification=True),
+    "rsa_pss": _caps(digitalSignature=True, signatureVerification=True),
+    "rsa": _caps(textEncryption=True, textDecryption=True,
+                 digitalSignature=True, signatureVerification=True,
+                 fileSignature=True, fileSignatureVerification=True,
+                 hybridEncryption=True,
+                 digitalCertificate=True, certificateAuthority=True),
+    "elgamal": _caps(textEncryption=True, textDecryption=True),
+    **{alg: _caps(hashing=True, fileHashing=True, integrityVerification=True)
+       for alg in ("md5", "sha1", "sha256", "sha512", "sha3", "blake2",
+                   "blake3", "sha224", "sha384", "ripemd160")},
+}
+
+
+def get_capabilities(alg_id: str) -> Dict[str, bool]:
+    """Return the capability map for an algorithm (raises if unknown)."""
+    return CAPABILITIES[alg_id]
 
 
 ALGORITHMS: Dict[str, dict] = {
@@ -884,6 +1000,308 @@ ALGORITHMS: Dict[str, dict] = {
         "description": "Very fast one-way hash built as a Merkle tree of chunks (extendable output).",
         "formula": "BLAKE2s rounds over a Merkle tree of chunks",
     },
+    "aes_cbc": {
+        "module": aes_cbc,
+        "name": "AES-CBC",
+        "category": "symmetric",
+        "operations": ["encrypt", "decrypt"],
+        "fields": _fields([
+            {"name": "plaintext", "type": "textarea", "label": "Plaintext",
+             "placeholder": "Hello, world!", "required": True},
+            {"name": "ciphertext_hex", "type": "textarea",
+             "label": "Ciphertext (hex)",
+             "placeholder": "hex ciphertext (multiple of 16 bytes)",
+             "required": False},
+            {"name": "key_hex", "type": "text", "label": "Key (32/48/64 hex digits)",
+             "placeholder": "000102030405060708090A0B0C0D0E0F", "required": True},
+            {"name": "iv_hex", "type": "text", "label": "IV (32 hex digits)",
+             "placeholder": "101112131415161718191A1B1C1D1E1F", "required": True},
+        ]),
+        "result_type": "object",
+        "security_status": "secure_with_padding",
+        "reversible": True,
+        "key_kind": "128/192/256-bit key (hex) + 128-bit IV",
+        "block_size": "128-bit blocks (PKCS#7 padded)",
+        "description": "AES in Cipher Block Chaining mode: each block is XORed "
+                       "with the previous ciphertext. Confidentiality only — "
+                       "must be combined with a MAC.",
+        "formula": "Cᵢ = E_K(Pᵢ ⊕ Cᵢ₋₁), C₀ = IV",
+    },
+    "aes_ctr": {
+        "module": aes_ctr,
+        "name": "AES-CTR",
+        "category": "symmetric",
+        "operations": ["encrypt", "decrypt"],
+        "fields": _fields([
+            {"name": "plaintext", "type": "textarea", "label": "Plaintext",
+             "placeholder": "Hello, world!", "required": True},
+            {"name": "ciphertext_hex", "type": "textarea",
+             "label": "Ciphertext (hex)",
+             "placeholder": "hex ciphertext (same length as plaintext)",
+             "required": False},
+            {"name": "key_hex", "type": "text", "label": "Key (32/48/64 hex digits)",
+             "placeholder": "000102030405060708090A0B0C0D0E0F", "required": True},
+            {"name": "counter_hex", "type": "text",
+             "label": "Counter block (32 hex digits)",
+             "placeholder": "F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF", "required": True},
+        ]),
+        "result_type": "object",
+        "security_status": "secure_with_auth",
+        "reversible": True,
+        "key_kind": "128/192/256-bit key (hex) + 128-bit counter block",
+        "block_size": "stream (128-bit counter)",
+        "description": "AES in counter mode: AES encrypts an incrementing "
+                       "counter to form a keystream XORed with the data. The "
+                       "counter must never repeat under one key.",
+        "formula": "Keystreamᵢ = E_K(IV + i); Cᵢ = Pᵢ ⊕ Keystreamᵢ",
+    },
+    "aes_ccm": {
+        "module": aes_ccm,
+        "name": "AES-CCM",
+        "category": "aead",
+        "operations": ["encrypt", "decrypt"],
+        "fields": _fields([
+            {"name": "plaintext", "type": "textarea", "label": "Plaintext",
+             "placeholder": "Hello, world!", "required": True},
+            {"name": "ciphertext_hex", "type": "textarea",
+             "label": "Ciphertext (hex, ciphertext+tag)",
+             "placeholder": "hex ciphertext (incl. tag)", "required": False},
+            {"name": "key_hex", "type": "text", "label": "Key (32/48/64 hex digits)",
+             "placeholder": "000102030405060708090A0B0C0D0E0F", "required": True},
+            {"name": "nonce_hex", "type": "text",
+             "label": "Nonce (14–26 hex digits)",
+             "placeholder": "00112233445566", "required": True},
+            {"name": "aad", "type": "textarea",
+             "label": "AAD (optional, authenticated)",
+             "placeholder": "optional authenticated data", "default": "",
+             "required": False},
+            {"name": "tag_length", "type": "select", "label": "Tag length (bytes)",
+             "options": [16, 14, 12, 10, 8, 6, 4], "default": 16, "required": True},
+        ]),
+        "result_type": "object",
+        "security_status": "secure",
+        "reversible": True,
+        "key_kind": "128/192/256-bit key (hex) + 7–13-byte nonce",
+        "block_size": "128-bit blocks (CTR + CBC-MAC)",
+        "description": "Authenticated encryption (NIST SP 800-38C): CTR-mode "
+                       "encryption with a CBC-MAC tag. Detects tampering and "
+                       "authenticates optional AAD.",
+        "formula": "C = CTR-mode AES; τ = CBC-MAC(AAD, C), truncated",
+    },
+    "camellia": {
+        "module": camellia,
+        "name": "Camellia",
+        "category": "symmetric",
+        "operations": ["encrypt", "decrypt"],
+        "fields": _fields([
+            {"name": "block", "type": "text", "label": "Block (32 hex digits)",
+             "placeholder": "00112233445566778899AABBCCDDEEFF", "required": True,
+             "default": "00112233445566778899AABBCCDDEEFF"},
+            {"name": "key", "type": "text", "label": "Key (32/48/64 hex digits)",
+             "placeholder": "0123456789ABCDEFFEDCBA9876543210", "required": True,
+             "default": "0123456789ABCDEFFEDCBA9876543210"},
+        ]),
+        "result_type": "text",
+        "security_status": "secure",
+        "reversible": True,
+        "key_kind": "128 / 192 / 256 bits (hex)",
+        "block_size": "128 bits",
+        "description": "128-bit Feistel block cipher (RFC 3713) with 18/24 "
+                       "rounds, recommended by NESSIE and CRYPTREC and used in "
+                       "TLS. Only one block is processed here.",
+        "formula": "Feistel: F = S1..S4 then P; 18 or 24 rounds",
+    },
+    "cmac": {
+        "module": cmac_alg,
+        "name": "CMAC",
+        "category": "mac",
+        "operations": ["sign", "verify"],
+        "fields": _fields([
+            {"name": "message", "type": "textarea", "label": "Message",
+             "placeholder": "Important message", "required": True},
+            {"name": "key_hex", "type": "text", "label": "AES key (hex)",
+             "placeholder": "2B7E151628AED2A6ABF7158809CF4F3C", "required": True},
+            {"name": "output_format", "type": "select", "label": "MAC encoding",
+             "options": ["hex", "base64"], "default": "hex", "required": True},
+            {"name": "mac", "type": "text", "label": "Provided MAC (for verify)",
+             "placeholder": "hex/base64 MAC to check", "required": False},
+        ]),
+        "result_type": "text",
+        "security_status": "secure",
+        "reversible": False,
+        "key_kind": "128/192/256-bit AES key (hex)",
+        "block_size": "128 bits (AES)",
+        "description": "Cipher-based MAC (NIST SP 800-38B) with secret subkeys "
+                       "K1/K2 masking the final block. Proves integrity and "
+                       "authenticity with a shared key; it does not encrypt.",
+        "formula": "M_last ⊕ K1/K2 → CBC-MAC → 128-bit tag",
+    },
+    "poly1305": {
+        "module": poly1305_alg,
+        "name": "Poly1305",
+        "category": "mac",
+        "operations": ["sign", "verify"],
+        "fields": _fields([
+            {"name": "message", "type": "textarea", "label": "Message",
+             "placeholder": "Important message", "required": True},
+            {"name": "key_hex", "type": "text",
+             "label": "One-time key (64 hex digits = r ‖ s)",
+             "placeholder": "85D6BE7857556D337F4452FE42D506A80103808AFB0DB2FD4ABFF6AF4149F51B",
+             "required": True},
+            {"name": "output_format", "type": "select", "label": "MAC encoding",
+             "options": ["hex", "base64"], "default": "hex", "required": True},
+            {"name": "mac", "type": "text", "label": "Provided MAC (for verify)",
+             "placeholder": "hex/base64 MAC to check", "required": False},
+        ]),
+        "result_type": "text",
+        "security_status": "secure_with_auth",
+        "reversible": False,
+        "key_kind": "256-bit one-time key (32 bytes hex = r ‖ s)",
+        "block_size": "16-byte message blocks",
+        "description": "Fast one-time authenticator using polynomial evaluation "
+                       "mod 2¹³⁰ − 5 (used in ChaCha20-Poly1305, RFC 8439). The "
+                       "key must be unique per message.",
+        "formula": "tag = ((Σ (mᵢ + 2¹²⁸)·rⁱ mod 2¹³⁰−5) + s) mod 2¹²⁸",
+    },
+    "x448": {
+        "module": x448,
+        "name": "X448",
+        "category": "key_exchange",
+        "operations": ["exchange"],
+        "fields": _fields([]),
+        "result_type": "text",
+        "security_status": "secure_with_auth",
+        "reversible": False,
+        "key_kind": "56-byte private scalar + 56-byte public key",
+        "block_size": "—",
+        "description": "RFC 7748 elliptic-curve Diffie–Hellman over Curve448 "
+                       "(x-coordinate only) targeting ~224-bit security; the "
+                       "conservative sibling of X25519.",
+        "formula": "s = X448(a, B) = X448(b, A)",
+    },
+    "dsa": {
+        "module": dsa_alg,
+        "name": "DSA",
+        "category": "signature",
+        "operations": ["generate_keys", "sign", "verify"],
+        "fields": _fields([
+            {"name": "message", "type": "textarea", "label": "Message",
+             "placeholder": "Message to sign", "required": True},
+            {"name": "hash_algorithm", "type": "select", "label": "Hash algorithm",
+             "options": ["sha256", "sha384", "sha512"], "default": "sha256",
+             "required": True},
+            {"name": "key_size", "type": "select", "label": "Key size (bits, for generate/sign)",
+             "options": [2048, 3072, 4096], "default": 2048, "required": False},
+            {"name": "signature_hex", "type": "text", "label": "Signature (hex, for verify)",
+             "placeholder": "DER signature from sign", "required": False},
+            {"name": "private_key_pem", "type": "textarea",
+             "label": "Private key (PEM, optional)",
+             "placeholder": "-----BEGIN PRIVATE KEY----- (blank = auto-generate)",
+             "required": False},
+            {"name": "public_key_pem", "type": "textarea",
+             "label": "Public key (PEM, for verify)",
+             "placeholder": "-----BEGIN PUBLIC KEY----- from sign/generate_keys",
+             "required": False},
+        ]),
+        "result_type": "text",
+        "security_status": "secure",
+        "reversible": False,
+        "key_kind": "FIPS 186 domain parameters + private x + public y",
+        "block_size": "—",
+        "description": "Digital Signature Algorithm (FIPS 186): signs a hash "
+                       "using discrete logarithms. Authenticates data; it does "
+                       "not encrypt. Prefer ECDSA/EdDSA for new systems.",
+        "formula": "r = (gᵏ mod p) mod q; s = k⁻¹(H(m) + x·r) mod q",
+    },
+    "rsa_pss": {
+        "module": rsa_pss_alg,
+        "name": "RSA-PSS",
+        "category": "signature",
+        "operations": ["generate_keys", "sign", "verify"],
+        "fields": _fields([
+            {"name": "message", "type": "textarea", "label": "Message",
+             "placeholder": "Message to sign", "required": True},
+            {"name": "hash_algorithm", "type": "select", "label": "Hash algorithm",
+             "options": ["sha256", "sha384", "sha512"], "default": "sha256",
+             "required": True},
+            {"name": "key_size", "type": "select", "label": "Key size (bits, for generate/sign)",
+             "options": [2048, 3072, 4096], "default": 2048, "required": False},
+            {"name": "signature_hex", "type": "text", "label": "Signature (hex, for verify)",
+             "placeholder": "hex signature from sign", "required": False},
+            {"name": "private_key_pem", "type": "textarea",
+             "label": "Private key (PEM, optional)",
+             "placeholder": "-----BEGIN PRIVATE KEY----- (blank = auto-generate)",
+             "required": False},
+            {"name": "public_key_pem", "type": "textarea",
+             "label": "Public key (PEM, for verify)",
+             "placeholder": "-----BEGIN PUBLIC KEY----- from sign/generate_keys",
+             "required": False},
+        ]),
+        "result_type": "text",
+        "security_status": "secure",
+        "reversible": False,
+        "key_kind": "RSA key pair (2048 / 3072 / 4096 bits)",
+        "block_size": "—",
+        "description": "RSA with the Probabilistic Signature Scheme (RFC 8017). "
+                       "The hash is salted into the PSS encoding, making "
+                       "signatures randomized and provably secure. This is a "
+                       "signature scheme, not RSA encryption.",
+        "formula": "s = (EMSA-PSS-encode(H(m), salt))ᵈ mod n",
+    },
+    "sha224": {
+        "module": sha224,
+        "name": "SHA-224",
+        "category": "hashing",
+        "operations": ["hash"],
+        "fields": _fields([
+            {"name": "message", "type": "textarea", "label": "Message",
+             "placeholder": "Hello, cryptography!", "required": True},
+        ]),
+        "result_type": "text",
+        "security_status": "secure",
+        "reversible": False,
+        "key_kind": "none",
+        "block_size": "512-bit blocks",
+        "description": "Truncated SHA-2 variant producing a 224-bit digest "
+                       "with a distinct initial value (FIPS 180-4).",
+        "formula": "SHA-256 compression (64 rounds), truncated to 224 bits",
+    },
+    "sha384": {
+        "module": sha384,
+        "name": "SHA-384",
+        "category": "hashing",
+        "operations": ["hash"],
+        "fields": _fields([
+            {"name": "message", "type": "textarea", "label": "Message",
+             "placeholder": "Hello, cryptography!", "required": True},
+        ]),
+        "result_type": "text",
+        "security_status": "secure",
+        "reversible": False,
+        "key_kind": "none",
+        "block_size": "1024-bit blocks",
+        "description": "Truncated SHA-512 variant producing a 384-bit digest "
+                       "with a distinct initial value (FIPS 180-4).",
+        "formula": "SHA-512 compression (80 rounds), truncated to 384 bits",
+    },
+    "ripemd160": {
+        "module": ripemd160,
+        "name": "RIPEMD-160",
+        "category": "hashing",
+        "operations": ["hash"],
+        "fields": _fields([
+            {"name": "message", "type": "textarea", "label": "Message",
+             "placeholder": "Hello, cryptography!", "required": True},
+        ]),
+        "result_type": "text",
+        "security_status": "deprecated",
+        "reversible": False,
+        "key_kind": "none",
+        "block_size": "512-bit blocks",
+        "description": "160-bit hash from the European RIPE project, used in "
+                       "Bitcoin addresses. Legacy — prefer SHA-256/SHA-3.",
+        "formula": "dual-line compression, 5 rounds × 16 steps (160-bit state)",
+    },
 }
 
 
@@ -901,9 +1319,10 @@ def get_catalog() -> List[dict]:
             "security_status": info["security_status"],
             "reversible": info["reversible"],
             "key_kind": info["key_kind"],
-            "block_size": info["block_size"],
+"block_size": info["block_size"],
             "description": info["description"],
             "formula": info["formula"],
+            "capabilities": CAPABILITIES[alg_id],
         })
     return items
 

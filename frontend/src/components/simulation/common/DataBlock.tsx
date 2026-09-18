@@ -6,7 +6,7 @@ export function DataBlock({
 }: {
   label?: string
   value: string
-  tone?: 'input' | 'key' | 'internal' | 'output' | 'transform' | 'muted'
+  tone?: 'input' | 'key' | 'internal' | 'output' | 'transform' | 'muted' | 'error'
   big?: boolean
 }) {
   return (

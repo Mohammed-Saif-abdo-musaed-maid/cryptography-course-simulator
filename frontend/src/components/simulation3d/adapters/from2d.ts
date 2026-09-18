@@ -2,6 +2,7 @@
 // existing i18n keys to produce Simulation3DStep[]. Every 3D adapter supplies
 // a per-view-kind scene so values stay EXACTLY the ones the 2D lab computed.
 import type { CharCell, SimulationEngine, SimStage } from '../../simulation/simulationTypes'
+import type { StepDetail } from '../../../types'
 import type {
   CameraConfig,
   EducationLevel,
@@ -74,13 +75,34 @@ function humanizeKind(kind: string): string {
  * Summary meta derived purely from the stage (phase → level, view kind →
  * operation). It never invents values, formulas or motivations — adapters that
  * provide richer per-step meta keep full control by passing `metaFor`.
+ *
+ * When the stage declares a `traceIndex` and the real backend trace is
+ * available, the genuine input/output of that trace step are surfaced as
+ * `inputs`/`outputs`/`changedValues` so the Step Inspector shows real values.
  */
-export function defaultStageMeta(stage: SimStage): Simulation3DStepMeta {
+export function defaultStageMeta(stage: SimStage, trace?: StepDetail[]): Simulation3DStepMeta {
   const level = stage.phase ? PHASE_LEVEL[stage.phase] : undefined
-  return {
+  const meta: Simulation3DStepMeta = {
     level: level ?? 'algorithm',
     operation: humanizeKind(viewKind(stage)),
   }
+  const idx = stage.traceIndex
+  const traced = idx && trace ? trace[idx - 1] : undefined
+  if (traced) {
+    meta.inputs = { input: traced.input }
+    meta.outputs = { output: traced.output }
+    if (traced.description) meta.why = traced.description
+    meta.changedValues = [
+      {
+        entity: traced.title || `step ${traced.step}`,
+        label: traced.title || `step ${traced.step}`,
+        before: traced.input,
+        after: traced.output,
+        reason: traced.description || undefined,
+      },
+    ]
+  }
+  return meta
 }
 
 // ---------------------------------------------------------------------------
@@ -147,7 +169,12 @@ export function createAdapterFromEngine(
     educationalKey: engine.educationalKey,
     demoInputs: engine.demoInputs,
     buildSteps(ctx) {
-      return stagesToSteps(engine.build(ctx), (st) => scene(st), metaFor ?? defaultStageMeta)
+      const trace = ctx.trace
+      return stagesToSteps(
+        engine.build(ctx),
+        (st) => scene(st),
+        (st, i) => (metaFor ? metaFor(st, i) : defaultStageMeta(st, trace)),
+      )
     },
     getLegend: () => DEFAULT_LEGEND,
     ...overrides,

@@ -1,4 +1,4 @@
-import type { AlgorithmResult } from '../../../types'
+import type { AlgorithmResult, StepDetail } from '../../../types'
 
 /** Color roles shared with the 2D lab palette (see styles/theme.css). */
 export type Sim3DTone =
@@ -162,6 +162,9 @@ export type SimulationEventType =
   | 'RESULT_READY'
   | 'PARAMETERS_SET'
   | 'INVALID_INPUT'
+  | 'BLOCK_ENCRYPTED'
+  | 'BLOCK_DECRYPTED'
+  | 'PADDING_REMOVED'
 
 /** One entity that changed in this step (register, cell, lane…). */
 export interface SimChangedValue {
@@ -208,6 +211,12 @@ export interface Simulation3DStepMeta {
   highlightedEntities?: string[]
   /** One-line "why does this happen" explanation. */
   why?: string
+  /**
+   * Provenance of the values shown in this step: `backend` means every value
+   * came from the real execution trace; `educational` means missing values
+   * are honest placeholders until a run binds them.
+   */
+  source?: 'backend' | 'educational'
 }
 
 export interface LegendEntry {
@@ -238,6 +247,8 @@ export interface Simulation3DContext {
   theme: 'dark' | 'light'
   result: AlgorithmResult | null
   resultMatches: boolean
+  /** The real backend execution trace (result.steps). */
+  trace: StepDetail[]
   t: (key: string) => string
 }
 

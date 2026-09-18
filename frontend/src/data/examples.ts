@@ -4226,5 +4226,347 @@ export const ALGORITHM_EXAMPLES: Record<string, AlgorithmExample[]> = {
       "note": "Tree hashing + extendable output length.",
       "expected": "085205f2d7c3d18f020720b5db5b375e081b58fd67c595c5a193a0bc3a09d336"
     }
-  ]
+  ],
+  "sha224": [
+    {
+      "id": "sha224-1",
+      "title": "Example 1",
+      "operation": "hash",
+      "values": {
+        "message": "abc",
+      },
+      "expected": "23097d223405d8228642a477bda255b32aadbce4bda0b3f7e36c9da7",
+      "note": "FIPS 180-4 reference: SHA-224('abc').",
+    },
+    {
+      "id": "sha224-2",
+      "title": "Example 2",
+      "operation": "hash",
+      "values": {
+        "message": "The quick brown fox jumps over the lazy dog",
+      },
+      "expected": "730e109bd7a8a32b1cb9d9a09aa2325d2430587ddbc0c38bad911525",
+      "note": "45 ASCII bytes (one 64-byte block).",
+    },
+  ],
+  "sha384": [
+    {
+      "id": "sha384-1",
+      "title": "Example 1",
+      "operation": "hash",
+      "values": {
+        "message": "abc",
+      },
+      "expected": "cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7",
+      "note": "FIPS 180-4 reference: SHA-384('abc').",
+    },
+    {
+      "id": "sha384-2",
+      "title": "Example 2",
+      "operation": "hash",
+      "values": {
+        "message": "The quick brown fox jumps over the lazy dog",
+      },
+      "expected": "ca737f1014a48f4c0b6dd43cb177b0afd9e5169367544c494011e3317dbf9a509cb1e5dc1e85a941bbee3d7f2afbc9b1",
+      "note": "45 ASCII bytes (one 128-byte block).",
+    },
+  ],
+  "ripemd160": [
+    {
+      "id": "ripemd160-1",
+      "title": "Example 1",
+      "operation": "hash",
+      "values": {
+        "message": "abc",
+      },
+      "expected": "8eb208f7e05d987a9b044a8e98c6b087f15a0bfc",
+      "note": "RIPEMD-160('abc') reference value.",
+    },
+    {
+      "id": "ripemd160-2",
+      "title": "Example 2",
+      "operation": "hash",
+      "values": {
+        "message": "The quick brown fox jumps over the lazy dog",
+      },
+      "expected": "37f332f68db77bd9d7edd4969571ad671cf9dd3b",
+      "note": "45 ASCII bytes (one 512-bit block).",
+    },
+  ],
+  "aes_cbc": [
+    {
+      "id": "aes_cbc-1",
+      "title": "Encrypt two blocks",
+      "operation": "encrypt",
+      "values": {
+        "plaintext": "Hello, cryptography!",
+        "key_hex": "000102030405060708090A0B0C0D0E0F",
+        "iv_hex": "101112131415161718191A1B1C1D1E1F",
+      },
+      "expected": "76442cbe420e7f679ebfbbaa98989044f2936dcb7725eeaf02b3ffb822bb43dc",
+      "note": "21-byte pkcs7-padded plaintext, 128-bit key, fixed IV. C\u2082 = E_K(P\u2082 \u2295 C\u2081).",
+    },
+    {
+      "id": "aes_cbc-2",
+      "title": "Decrypt round-trip",
+      "operation": "decrypt",
+      "values": {
+        "ciphertext_hex": "76442cbe420e7f679ebfbbaa98989044f2936dcb7725eeaf02b3ffb822bb43dc",
+        "key_hex": "000102030405060708090A0B0C0D0E0F",
+        "iv_hex": "101112131415161718191A1B1C1D1E1F",
+      },
+      "expected": "Hello, cryptography!",
+      "note": "Decrypts the ciphertext of the encrypt example using the same IV.",
+    },
+  ],
+  "aes_ctr": [
+    {
+      "id": "aes_ctr-1",
+      "title": "Encrypt from a counter",
+      "operation": "encrypt",
+      "values": {
+        "plaintext": "Hello, cryptography!",
+        "key_hex": "000102030405060708090A0B0C0D0E0F",
+        "counter_hex": "F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF",
+      },
+      "expected": "2ec2ab845b7e112be528ae735c71dfccc2e9ae21",
+      "note": "21-byte plaintext (two counter blocks): C\u1d62 = P\u1d62 \u2295 E_K(0x00000000F0..).",
+    },
+    {
+      "id": "aes_ctr-2",
+      "title": "Decrypt round-trip",
+      "operation": "decrypt",
+      "values": {
+        "ciphertext_hex": "2ec2ab845b7e112be528ae735c71dfccc2e9ae21",
+        "key_hex": "000102030405060708090A0B0C0D0E0F",
+        "counter_hex": "F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF",
+      },
+      "expected": "Hello, cryptography!",
+      "note": "CTR encryption and decryption are the same operation with the same counter.",
+    },
+  ],
+  "aes_ccm": [
+    {
+      "id": "aes_ccm-1",
+      "title": "Authenticated encryption",
+      "operation": "encrypt",
+      "values": {
+        "plaintext": "Top secret message",
+        "key_hex": "000102030405060708090A0B0C0D0E0F",
+        "nonce_hex": "00112233445566778899AABB",
+        "aad": "Network-A",
+        "tag_length": "16",
+      },
+      "expected": "87533a02e93bc9d01dc039d00fdbf034361822506951d9a777dc0abd303e5d12b5ee",
+      "note": "12-byte nonce, 16-byte tag; AAD is authenticated but not encrypted.",
+    },
+    {
+      "id": "aes_ccm-2",
+      "title": "Decrypt and authenticate",
+      "operation": "decrypt",
+      "values": {
+        "ciphertext_hex": "87533a02e93bc9d01dc039d00fdbf034361822506951d9a777dc0abd303e5d12b5ee",
+        "key_hex": "000102030405060708090A0B0C0D0E0F",
+        "nonce_hex": "00112233445566778899AABB",
+        "aad": "Network-A",
+        "tag_length": "16",
+      },
+      "expected": "Top secret message",
+      "note": "Same key, nonce, AAD and byte length: decrypts, verifies the tag, returns PASS.",
+    },
+  ],
+  "camellia": [
+    {
+      "id": "camellia-1",
+      "title": "Encrypt one block (128-bit key)",
+      "operation": "encrypt",
+      "values": {
+        "block": "0123456789abcdeffedcba9876543210",
+        "key": "000102030405060708090a0b0c0d0e0f",
+      },
+      "expected": "b52aef21b2a08a3bd70a75eeb78c46f2",
+      "note": "Single 128-bit plaintext block, 18 Feistel rounds.",
+    },
+    {
+      "id": "camellia-2",
+      "title": "Decrypt round-trip (128-bit key)",
+      "operation": "decrypt",
+      "values": {
+        "block": "b52aef21b2a08a3bd70a75eeb78c46f2",
+        "key": "000102030405060708090a0b0c0d0e0f",
+      },
+      "expected": "0123456789abcdeffedcba9876543210",
+      "note": "Inverse key schedule recovers the original block.",
+    },
+    {
+      "id": "camellia-3",
+      "title": "Encrypt one block (256-bit key)",
+      "operation": "encrypt",
+      "values": {
+        "block": "0123456789abcdeffedcba9876543210",
+        "key": "000102030405060708090a0b0c0d0e0ff0e0d0c0b0a090807060504030201000",
+      },
+      "expected": "a4017e3c82631ba14ed23ac3f69294a4",
+      "note": "256-bit key drives 24 Feistel rounds.",
+    },
+  ],
+  "cmac": [
+    {
+      "id": "cmac-1",
+      "title": "Generate the tag",
+      "operation": "sign",
+      "values": {
+        "message": "Important message",
+        "key_hex": "2B7E151628AED2A6ABF7158809CF4F3C",
+        "output_format": "hex",
+      },
+      "expected": "466ef50d7051071d8d27cc2670980293",
+      "note": "One 16-byte block: last block masked by subkey K1 before AES-CBC.",
+    },
+    {
+      "id": "cmac-2",
+      "title": "Verify the tag",
+      "operation": "verify",
+      "values": {
+        "message": "Important message",
+        "key_hex": "2B7E151628AED2A6ABF7158809CF4F3C",
+        "output_format": "hex",
+        "mac": "466ef50d7051071d8d27cc2670980293",
+      },
+      "expected": "valid",
+      "note": "Recomputes and compares the tag with the value from the sign example.",
+    },
+  ],
+  "poly1305": [
+    {
+      "id": "poly1305-1",
+      "title": "Generate the tag",
+      "operation": "sign",
+      "values": {
+        "message": "Cryptographic Forum Research Group",
+        "key_hex": "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b",
+        "output_format": "hex",
+      },
+      "expected": "a8061dc1305136c6c22b8baf0c0127a9",
+      "note": "RFC 8439 Poly1305 test vector (two message blocks).",
+    },
+    {
+      "id": "poly1305-2",
+      "title": "Verify the tag",
+      "operation": "verify",
+      "values": {
+        "message": "Cryptographic Forum Research Group",
+        "key_hex": "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b",
+        "output_format": "hex",
+        "mac": "a8061dc1305136c6c22b8baf0c0127a9",
+      },
+      "expected": "valid",
+      "note": "Recomputes the 128-bit tag and compares with the generated value.",
+    },
+  ],
+  "x448": [
+    {
+      "id": "x448-1",
+      "title": "Key agreement",
+      "operation": "exchange",
+      "values": {
+      },
+      "expected": "fe8b57c8598882fd2ce14b64ca6a60c7b573ea6969e8b445d1522c6374b33ae3c745788f6d046c9ebad2dd728004c1e7e1140334ad3aaf3f",
+      "note": "Two fresh Curve448 keypairs; Alice and Bob derive the same shared secret.",
+    },
+  ],
+  "dsa": [
+    {
+      "id": "dsa-1",
+      "title": "Key generation (2048-bit)",
+      "operation": "generate_keys",
+      "values": {
+        "message": "",
+        "hash_algorithm": "sha256",
+        "key_size": "2048",
+        "signature_hex": "",
+        "private_key_pem": "",
+        "public_key_pem": "",
+      },
+      "expected": "p, q, g domain parameters + private scalar generated",
+      "note": "FIPS 186 recommends 2048-bit keys.",
+    },
+    {
+      "id": "dsa-2",
+      "title": "Sign a message",
+      "operation": "sign",
+      "values": {
+        "message": "Sign me, DSA",
+        "hash_algorithm": "sha256",
+        "key_size": "2048",
+        "signature_hex": "",
+        "private_key_pem": "-----BEGIN PRIVATE KEY-----\nMIICZAIBADCCAjkGByqGSM44BAEwggIsAoIBAQD82GEIqfHWDtNUku7oiKhtZ2B9\nKD1sIAStramFHUj47IkMU+/mnF/EdnJ8OKqOOwhjVvdpS4mOq5VuNCkJpn6xw4cF\nGj3bfkj7SuJ4Gar8ozIP8dtPcOm8BlckOs508DorlpNcEXd4epnuJCHYCBeHXSRY\nfso9FsVGSFGdeqb2l/zGwEx9aiaVjt2iRZPlCKgtoaJ+W3ex8KMG7jqJvsx+69VP\nOd6IgWSDmqI4OQZ1LIazQJSIFIKyfhKr+uwNoXq+8MWZTwbYD4rpt1boPZMVV130\nIGyxO4dzeyJYvgY4qHeeHO52NbGJ19Y5dOez3qikw3qMx1lefbTK9DQ3H9zZAiEA\n+KePZGcs23EM1k9HSllxgjICrZyKjTRBZWcX+N1IA5sCggEAUp8Q56BWO2Du1zh6\nTJEjqPywSikebpkbjoNUgvMSEcKc0wTtV5/mSSxzdTdYyoxfubuBH2yhiHGqu7VU\nKvOkvTpD4B7yxOa1a+8yTeD1VhBpTEuOJO2dkwBb2rHyuLar+9FGDwbZmjtwOpTN\n07n1LDsQBOqwiBvsB5K/bWtVY880oxK43R9ZBX1PmKfL69EgFDj0OrKLz3QLHPcS\nwYmWFBABAxul9HktoNZ+gRfrlfz8md65lQ3GP3iv93oVvQvmTjjVCBcjcbUWoyVu\nrYCrequKo81jIiN2kBiqwvMM4apf3iuirsIo4SyAf2G/McEIvTRz3ps/iLxoLtfi\n3bXH7wQiAiBqWVLjt2cTzf3UYkonMfJoReKCTAYfZW71vWb5Cl209A==\n-----END PRIVATE KEY-----\n",
+        "public_key_pem": "",
+      },
+      "expected": "3046022100932175ab7510dfceac39ae8324b5f0078f820a57a739a2cb9f4cdcfcc15a7d8b0221008bb997e8d0e307697f99ba53cdc0034e871e9af730bb76dd69b5d4c8414107b5",
+      "note": "DER-encoded (r, s). Value matches the reader's key pair.",
+    },
+    {
+      "id": "dsa-3",
+      "title": "Verify the signature",
+      "operation": "verify",
+      "values": {
+        "message": "Sign me, DSA",
+        "hash_algorithm": "sha256",
+        "key_size": "2048",
+        "signature_hex": "3046022100932175ab7510dfceac39ae8324b5f0078f820a57a739a2cb9f4cdcfcc15a7d8b0221008bb997e8d0e307697f99ba53cdc0034e871e9af730bb76dd69b5d4c8414107b5",
+        "private_key_pem": "",
+        "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMIIDRjCCAjkGByqGSM44BAEwggIsAoIBAQD82GEIqfHWDtNUku7oiKhtZ2B9KD1s\nIAStramFHUj47IkMU+/mnF/EdnJ8OKqOOwhjVvdpS4mOq5VuNCkJpn6xw4cFGj3b\nfkj7SuJ4Gar8ozIP8dtPcOm8BlckOs508DorlpNcEXd4epnuJCHYCBeHXSRYfso9\nFsVGSFGdeqb2l/zGwEx9aiaVjt2iRZPlCKgtoaJ+W3ex8KMG7jqJvsx+69VPOd6I\ngWSDmqI4OQZ1LIazQJSIFIKyfhKr+uwNoXq+8MWZTwbYD4rpt1boPZMVV130IGyx\nO4dzeyJYvgY4qHeeHO52NbGJ19Y5dOez3qikw3qMx1lefbTK9DQ3H9zZAiEA+KeP\nZGcs23EM1k9HSllxgjICrZyKjTRBZWcX+N1IA5sCggEAUp8Q56BWO2Du1zh6TJEj\nqPywSikebpkbjoNUgvMSEcKc0wTtV5/mSSxzdTdYyoxfubuBH2yhiHGqu7VUKvOk\nvTpD4B7yxOa1a+8yTeD1VhBpTEuOJO2dkwBb2rHyuLar+9FGDwbZmjtwOpTN07n1\nLDsQBOqwiBvsB5K/bWtVY880oxK43R9ZBX1PmKfL69EgFDj0OrKLz3QLHPcSwYmW\nFBABAxul9HktoNZ+gRfrlfz8md65lQ3GP3iv93oVvQvmTjjVCBcjcbUWoyVurYCr\nequKo81jIiN2kBiqwvMM4apf3iuirsIo4SyAf2G/McEIvTRz3ps/iLxoLtfi3bXH\n7wOCAQUAAoIBAFoP9Uvm0ulswZSQRjHscnCM2UZxGZmlM8L/epq24PCapPKNdlF+\nDHMs+PZGEHeq68AhppeOnlryFRhIHqvk8op/foItmEMOexmgH0vsEzJlEXRMKl65\nAMkh6FFflNHu/9qysHkBwS2GWz5+8pVz8e2QKmMpNaFtqJYx8Kc8o+vvr7kWTnqs\nHz091eJSejZCrhaJfcCcoL+NUikmmXqL5AUgFrz/YXP7O5NcXPPx60BNeVAt35FY\nKm9zQw2CAbRblwFeHIGPpVBuM6cOqOlCURtRV15VHBEA7gmNSatweQNNjbDjXz0w\netXv6bskrGBVo7D8hhUQCA0A+xkEVxyrd70=\n-----END PUBLIC KEY-----\n",
+      },
+      "expected": "VALID",
+      "note": "Pairs with the sign example (same key pair, hash and params).",
+    },
+  ],
+  "rsa_pss": [
+    {
+      "id": "rsa_pss-1",
+      "title": "Key generation (2048-bit)",
+      "operation": "generate_keys",
+      "values": {
+        "message": "",
+        "hash_algorithm": "sha256",
+        "key_size": "2048",
+        "signature_hex": "",
+        "private_key_pem": "",
+        "public_key_pem": "",
+      },
+      "expected": "2048-bit RSA key pair generated",
+      "note": "Public exponent e = 65537.",
+    },
+    {
+      "id": "rsa_pss-2",
+      "title": "Sign a message",
+      "operation": "sign",
+      "values": {
+        "message": "Sign me, RSA-PSS",
+        "hash_algorithm": "sha256",
+        "key_size": "2048",
+        "signature_hex": "",
+        "private_key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDJt9KzF7WpnMjb\nu5aP4AFo+GJJLSC6lY9QLw6S04OFl9KcUb2dUt3aFua45PbwYK0+pXxiJbh2pJUk\nnTVS0MmWmf+8Foijrrp1s0cnTgHJgUNct7XpbQ61ipJ2zRkBX5R54tfKmAjuO8Oj\nlc5JJohUjCy+HtRPspRIOgZv2WdCMyo7Jz+sno/jUtdH+ii66qGoPIosnGaTizlE\nR6+dFHE+/IqC9PNB6pAa1Y+ufsAFHumA43TgnNK2BXI89ZO/sqAUkV0D/QonDT3p\n5ufQBcGnQ009k6+0we/I7W+b0gMPlff+b43YxeHlboyrcJUSVbZzYqZ0Kc9zikoz\n4/S3EJi9AgMBAAECggEASJqJ0106zSA56WDU+dcKGuKf2a/NAmtXaGhviehog9qX\n+xyur2QGpvssMytyOCXL5WsB4H+sK8PkTIfrC/JLRJIMSoIfzy5SPY/4Ec0Rdpo4\niTQ0XR6cNzp3qhv7HpPs6Iv92JUtTbYkHgqK86hTVH8ZkZqeF0ty9KYx7+sjr97/\npLUEwGI3AY7p+Rt6/TJef9EbEruIJTHFhXaxzvwrf0XT537U+fqRekCxIUbAhAw7\n6i4GkJyTEokvQDFsOrBEwPnRuqcpG8+uPC0VhoBwdkvo5JhmCyhxd2tR/fj2UDrC\ntxDkBvpyMJ8G5j2Gpn9yNbxMoEdzKWDbUNOqaKPBzwKBgQDzG49u2xw1oJhLKMQO\ntPneAwr+GoBd9hxFPYnOofENuYZ9kx43HdltyX8J15tWsZLNvqh/3riLksLB8zXZ\n6awywVpRkXm9QqdQUVBPEUdxi+SK+s/gyY+M9DWS8cEspbRQ0YFS/OnFKKGjZ2Gr\neaidJRMwGKQ+nnsQ75XtVUN9EwKBgQDUalsYVATtuCllnx9PUbG2jKeDJAPxHysE\no6uKSCp0Pvw8xbNROiQT94eYQyVPwmvyXKIKCdyN3SeGydu4rzc4vETQi1nA0k8V\nI7u4wn+0LXJg5/viBj30J/dtbmzM9XJsgIRs7IkMhzfTqRqChEnJ3gRV8INJjaSM\nyZ1dgvRc7wKBgQDDu+bqHGREET9NFE92f+PGCrEpEfFUtbjhTsDLq7tHj55nMLJd\nMh1Dtb4hEIUzcdl+6gkEmy/+wHUqb0VmZCuO2fp8PiLEbQwFMNL2NjVNiJLEC1if\n5ek8Vctkul0MM4ZQo736MUOOyD4MMEqFI3jMvXMLgGuNN1BivGP8KHAkHQKBgDHY\nf2X3GWz7YWOCcqN3ZT+URB7nDbHAgaTGD5QUmTnMKf7M2eZ+wUaaOIyHfTL5ScGG\n8VNvuvzjX8omhlQRceDzdSaG/NndwEcSqpORuMv8OjH5XkdM9a7czhg06H00P9Ss\nV+cDnql89aHKtfjYuEQRwGy2Uuiov2t2SGJQP62rAoGBAIKfPWNjauDVW9ZmCwbp\nQHQIV5yAaX5tjA6VT89I2dNltOXiV/FCk2eqF5W7vqWY4K+MIV9a5pQT6jktq3nm\n2HqTF4PDpq+AbIxBKXXftej2GYmPyAVP1zFN0Or9LqfJSbhrEhE9Z4h5gCjGO/7e\nyVAVObiRgJacooG6oHfPb6qJ\n-----END PRIVATE KEY-----\n",
+        "public_key_pem": "",
+      },
+      "expected": "99113df65eabd070fb08c75e36ec96a1d4652ff908a312a5af65db88d969d8fb7c78f5c79f68d50a6a8662b6efa77731892e389faebf168316c219b7cef4f70cd0b2cedfd67a59bbe84e7f3f50418dc464a866b0c1441dd1857fee4b564c01de721cf6817c755c5c5f6b1fe620c29edb4ff2e569377464863ea79cdf788c35941efc36ff265f985d1c1b17e7ee44ed69fb4e4e89f6352f368c6de75336c2ae50e3c62aa7680874477d80b43f99b0cc66ea8e4becd2a5b4169d80bdf01cd4814b1786c47f931bee030ab01338452f3083ae9544ff05eaaefcd3a5c8eec4a7796a4e41b5735775125ead2df080fd0a88f3c32ed40d5f09bdf9bfbf0809ef8ebe31",
+      "note": "PSS pads the digest with random salt before the RSA private operation.",
+    },
+    {
+      "id": "rsa_pss-3",
+      "title": "Verify the signature",
+      "operation": "verify",
+      "values": {
+        "message": "Sign me, RSA-PSS",
+        "hash_algorithm": "sha256",
+        "key_size": "2048",
+        "signature_hex": "99113df65eabd070fb08c75e36ec96a1d4652ff908a312a5af65db88d969d8fb7c78f5c79f68d50a6a8662b6efa77731892e389faebf168316c219b7cef4f70cd0b2cedfd67a59bbe84e7f3f50418dc464a866b0c1441dd1857fee4b564c01de721cf6817c755c5c5f6b1fe620c29edb4ff2e569377464863ea79cdf788c35941efc36ff265f985d1c1b17e7ee44ed69fb4e4e89f6352f368c6de75336c2ae50e3c62aa7680874477d80b43f99b0cc66ea8e4becd2a5b4169d80bdf01cd4814b1786c47f931bee030ab01338452f3083ae9544ff05eaaefcd3a5c8eec4a7796a4e41b5735775125ead2df080fd0a88f3c32ed40d5f09bdf9bfbf0809ef8ebe31",
+        "private_key_pem": "",
+        "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAybfSsxe1qZzI27uWj+AB\naPhiSS0gupWPUC8OktODhZfSnFG9nVLd2hbmuOT28GCtPqV8YiW4dqSVJJ01UtDJ\nlpn/vBaIo666dbNHJ04ByYFDXLe16W0OtYqSds0ZAV+UeeLXypgI7jvDo5XOSSaI\nVIwsvh7UT7KUSDoGb9lnQjMqOyc/rJ6P41LXR/oouuqhqDyKLJxmk4s5REevnRRx\nPvyKgvTzQeqQGtWPrn7ABR7pgON04JzStgVyPPWTv7KgFJFdA/0KJw096ebn0AXB\np0NNPZOvtMHvyO1vm9IDD5X3/m+N2MXh5W6Mq3CVElW2c2KmdCnPc4pKM+P0txCY\nvQIDAQAB\n-----END PUBLIC KEY-----\n",
+      },
+      "expected": "VALID",
+      "note": "Pairs with the sign example (same key pair, hash and salt length).",
+    },
+  ],
 }

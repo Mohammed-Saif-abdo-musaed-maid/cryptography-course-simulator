@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { interpolate } from '../simulation/simulationTypes'
 import type { Simulation3DStep, Simulation3DStepMeta } from './types/simulation3d'
 import { DataBlock } from '../simulation/common/DataBlock'
@@ -69,8 +70,13 @@ export function Simulation3DStepPanel({ steps, step, ctx }: Simulation3DStepPane
 function StepMeta({ meta, t }: { meta: Simulation3DStepMeta; t: (key: string) => string }) {
   return (
     <div className="sim3d-inspector">
-      {(meta.event || meta.operation) && (
+      {(meta.event || meta.operation || meta.source) && (
         <div className="sim3d-inspector-row">
+          {meta.source && (
+            <span className={`sim3d-source sim3d-source-${meta.source}`}>
+              {t(meta.source === 'backend' ? 'simulation3d.inspector.sourceBackend' : 'simulation3d.inspector.sourceEducational')}
+            </span>
+          )}
           {meta.event && (
             <span className={`sim3d-event sim3d-event-${String(meta.event).toLowerCase()}`}>
               {meta.event.replace(/_/g, ' ')}
@@ -99,9 +105,9 @@ function StepMeta({ meta, t }: { meta: Simulation3DStepMeta; t: (key: string) =>
               {meta.changedValues.map((c, i) => (
                 <tr key={`${c.entity}-${i}`}>
                   <td className="sim3d-entity mono" dir="ltr">{c.entity}</td>
-                  <td className="sim3d-before mono" dir="ltr">{c.before}</td>
+                  <td className="sim3d-before mono" dir="ltr" title={c.before}>{c.before}</td>
                   <td className="sim3d-arrow" aria-hidden="true">→</td>
-                  <td className="sim3d-after mono" dir="ltr">{c.after}</td>
+                  <td className="sim3d-after mono" dir="ltr" title={c.after}>{c.after}</td>
                   {c.reason && (
                     <td className="sim3d-reason mono" dir="ltr">{c.reason}</td>
                   )}
@@ -115,14 +121,14 @@ function StepMeta({ meta, t }: { meta: Simulation3DStepMeta; t: (key: string) =>
       {meta.inputs && Object.keys(meta.inputs).length > 0 && (
         <div className="sim3d-inspector-section">
           <div className="sim3d-inspector-label">{t('simulation3d.inspector.inputs')}</div>
-          <KvGrid data={meta.inputs} />
+          <KvGrid data={meta.inputs} t={t} />
         </div>
       )}
 
       {meta.outputs && Object.keys(meta.outputs).length > 0 && (
         <div className="sim3d-inspector-section">
           <div className="sim3d-inspector-label">{t('simulation3d.inspector.outputs')}</div>
-          <KvGrid data={meta.outputs} />
+          <KvGrid data={meta.outputs} t={t} />
         </div>
       )}
 
@@ -135,13 +141,13 @@ function StepMeta({ meta, t }: { meta: Simulation3DStepMeta; t: (key: string) =>
             {meta.stateBefore && (
               <div className="sim3d-state-col">
                 <div className="sim3d-state-cap">{t('simulation3d.inspector.stateBefore')}</div>
-                <KvGrid data={meta.stateBefore} />
+                <KvGrid data={meta.stateBefore} t={t} />
               </div>
             )}
             {meta.stateAfter && (
               <div className="sim3d-state-col">
                 <div className="sim3d-state-cap">{t('simulation3d.inspector.stateAfter')}</div>
-                <KvGrid data={meta.stateAfter} />
+                <KvGrid data={meta.stateAfter} t={t} />
               </div>
             )}
           </div>
@@ -153,15 +159,43 @@ function StepMeta({ meta, t }: { meta: Simulation3DStepMeta; t: (key: string) =>
   )
 }
 
-function KvGrid({ data }: { data: Record<string, string> }) {
+function KvGrid({ data, t }: { data: Record<string, string>; t: (key: string) => string }) {
   return (
     <div className="sim3d-kv">
       {Object.entries(data).map(([k, v]) => (
         <div className="sim3d-kv-item" key={k}>
           <span className="sim3d-kv-key mono" dir="ltr">{k}</span>
-          <span className="sim3d-kv-val mono" dir="ltr">{v}</span>
+          <ValueBox value={v} copyLabel={t('simulation3d.inspector.copy')} />
         </div>
       ))}
     </div>
+  )
+}
+
+/** Monospace value: truncated with ellipsis, click to expand, copy button. */
+function ValueBox({ value, copyLabel }: { value: string; copyLabel: string }) {
+  const [open, setOpen] = useState(false)
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value)
+    } catch {
+      // clipboard unavailable (non-secure context) — silently ignore
+    }
+  }
+  return (
+    <span className={`sim3d-kv-val mono${open ? ' is-open' : ''}`} dir="ltr" title={value}>
+      <button
+        type="button"
+        className="sim3d-kv-text"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-label={`${open ? 'collapse' : 'expand'} ${value}`}
+      >
+        {value}
+      </button>
+      <button type="button" className="sim3d-copy mono" onClick={copy} aria-label={`${copyLabel}: ${value}`}>
+        ⧉
+      </button>
+    </span>
   )
 }

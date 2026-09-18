@@ -84,7 +84,7 @@ self-study, laboratory sessions, and exam preparation.
 
 | Feature | Description | Status |
 | --- | --- | --- |
-| Real algorithm execution | 35 algorithms implemented and executed on the backend; results match published test vectors | Implemented |
+| Real algorithm execution | 47 algorithms implemented and executed on the backend; results match published test vectors | Implemented |
 | Encryption & decryption | Classical, symmetric, asymmetric and AEAD operations with genuine intermediate states | Implemented |
 | Step-by-step visualization | Structured `steps[]` per operation (round states, key schedules, matrices, tables) rendered in the UI | Implemented |
 | 2D simulation engine | Animated, playable walkthrough of each algorithm's data flow | Implemented |
@@ -98,14 +98,14 @@ self-study, laboratory sessions, and exam preparation.
 | REST API | Endpoints under `/api` consumed by the frontend; interactive Swagger docs | Implemented |
 | Language support | English and Arabic (العربية) with automatic RTL layout | Implemented |
 | Theming | Dark cybersecurity theme by default, with a light theme variant | Implemented |
-| Automated testing | 283 backend tests (known vectors, round-trips, API, lifecycle) — all passing; frontend strict type-check | Implemented |
+| Automated testing | 669 backend tests (known vectors, round-trips, API, lifecycle) + 27 frontend tests — all passing; frontend strict type-check | Implemented |
 | Docker support | One-command local deployment via Docker Compose | Implemented |
 
 ---
 
 ## 🔐 Supported Algorithms
 
-**35 algorithms · 9 categories.** The backend keeps a single source of truth —
+**47 algorithms · 9 categories.** The backend keeps a single source of truth —
 `backend/app/algorithms/registry.py` — which drives both the API and the
 frontend forms generically. Every algorithm also ships an **animated 2D
 visualization** and an **interactive 3D visualization** built from the real
@@ -138,6 +138,9 @@ Each algorithm is labelled with an honest security status:
 | Symmetric | Blowfish | Variable-key (32–448-bit) Feistel cipher | 2D · 3D |
 | Symmetric | Twofish | 128-bit block cipher, AES finalist | 2D · 3D |
 | Symmetric | ChaCha20 | RFC 8439 stream cipher | 2D · 3D |
+| Symmetric | AES-CBC | AES block chaining (CBC, PKCS#7) | 2D · 3D |
+| Symmetric | AES-CTR | AES in counter mode (keystream) | 2D · 3D |
+| Symmetric | Camellia | 128-bit Feistel cipher (RFC 3713) | 2D · 3D |
 
 ### Authenticated Encryption (AEAD)
 
@@ -145,6 +148,7 @@ Each algorithm is labelled with an honest security status:
 |----------|-----------|------|------------|
 | AEAD | AES-GCM | AES-CTR + GHASH authentication tag | 2D · 3D |
 | AEAD | ChaCha20-Poly1305 | RFC 8439 authenticated stream cipher | 2D · 3D |
+| AEAD | AES-CCM | Authenticated encryption (NIST SP 800-38C) | 2D · 3D |
 
 ### Hash Functions
 
@@ -157,12 +161,17 @@ Each algorithm is labelled with an honest security status:
 | Hash | SHA-3 | Keccak sponge (224/256/384/512) | 2D · 3D |
 | Hash | BLAKE2 | Fast parameterized hash (b-512 / s-256) | 2D · 3D |
 | Hash | BLAKE3 | Merkle-tree hash with extendable output | 2D · 3D |
+| Hash | SHA-224 | Truncated SHA-2 variant (224-bit) | 2D · 3D |
+| Hash | SHA-384 | Truncated SHA-2 variant (384-bit) | 2D · 3D |
+| Hash | RIPEMD-160 | Legacy 160-bit digest (deprecated) | 2D · 3D |
 
 ### Message Authentication (MAC)
 
 | Category | Algorithm | Type | Simulation |
 |----------|-----------|------|------------|
 | MAC | HMAC | Keyed hash (RFC 2104, SHA-256/SHA-512) | 2D · 3D |
+| MAC | CMAC | AES-CBC MAC with K1/K2 subkeys (SP 800-38B) | 2D · 3D |
+| MAC | Poly1305 | One-time polynomial authenticator | 2D · 3D |
 
 ### Password Hashing & Key Derivation (KDF)
 
@@ -184,8 +193,9 @@ Each algorithm is labelled with an honest security status:
 | Asymmetric | ElGamal | Randomized encryption on the Diffie–Hellman problem | 2D · 3D |
 
 > **Note on counting:** RSA-OAEP and RSA-PSS are operations of the *single*
-> `rsa` module in the registry (exposed as `encrypt_oaep` / `decrypt_oaep` /
-> `sign_pss` / `verify_pss`). The backend registry therefore registers **35
+> `rsa` module (exposed as `encrypt_oaep` / `decrypt_oaep` / `sign_pss` /
+> `verify_pss`). Phase 5 additionally registered RSA-PSS as its own standalone
+> `rsa_pss` algorithm module. The backend registry therefore registers **47
 > algorithm modules** in total.
 
 ### Key Exchange
@@ -195,6 +205,7 @@ Each algorithm is labelled with an honest security status:
 | Key Exchange | Diffie–Hellman | Shared-secret agreement over an insecure channel | 2D · 3D |
 | Key Exchange | ECDH | Elliptic-curve Diffie–Hellman (P-256/384/521) | 2D · 3D |
 | Key Exchange | X25519 | Curve25519 Diffie–Hellman (RFC 7748) | 2D · 3D |
+| Key Exchange | X448 | Curve448 Diffie–Hellman (RFC 7748) | 2D · 3D |
 
 ### Digital Signatures
 
@@ -202,6 +213,8 @@ Each algorithm is labelled with an honest security status:
 |----------|-----------|------|------------|
 | Signature | ECDSA | Elliptic-curve signatures (FIPS 186-4) | 2D · 3D |
 | Signature | Ed25519 | RFC 8032 deterministic signatures | 2D · 3D |
+| Signature | DSA | Discrete-log signatures (FIPS 186) | 2D · 3D |
+| Signature | RSA-PSS | Probabilistic RSA signatures (PKCS#1 v2) | 2D · 3D |
 
 > **Key exchange is not encryption.** These protocols establish a *shared
 > secret* that can later be used to derive encryption keys — they do not, by
@@ -214,11 +227,12 @@ Each algorithm is labelled with an honest security status:
   Twofish/ChaCha20) are **custom educational implementations** written from
   scratch for teaching (S-boxes, key schedules, compression functions,
   square-and-multiply, etc.).
-- **Modern library-backed primitives** (HMAC, PBKDF2, scrypt, Argon2, HKDF,
-  AES-GCM, ChaCha20-Poly1305, ECDH, X25519, ECDSA, Ed25519, RSA-OAEP/PSS,
-  bcrypt) are built on the well-reviewed `cryptography`, `bcrypt` and
-  `argon2-cffi` libraries. The UI still surfaces real intermediate values for
-  teaching.
+- **Modern library-backed primitives** (HMAC, CMAC, Poly1305, PBKDF2, scrypt,
+  Argon2, HKDF, AES-GCM, AES-CBC, AES-CTR, AES-CCM, Camellia, ChaCha20-Poly1305,
+  ECDH, X25519, X448, ECDSA, Ed25519, DSA, RSA-OAEP, RSA-PSS, `sha224`/`sha384`/
+  `ripemd160` via `hashlib`, bcrypt) are built on the well-reviewed
+  `cryptography`, `bcrypt` and `argon2-cffi` libraries. The UI still surfaces
+  real intermediate values for teaching.
 
 ---
 
@@ -290,7 +304,7 @@ flowchart TD
     F -->|"REST /api"| B[FastAPI Backend]
     B --> S[Services layer<br/>algorithm · math · exercise · quiz]
     S --> R[Algorithm Registry<br/>single source of truth]
-    R --> M[35 algorithm modules<br/>custom + library-backed]
+    R --> M[47 algorithm modules<br/>custom + library-backed]
     M -->|result + steps[]| S
     S --> B
     B --> F
@@ -352,7 +366,7 @@ flowchart TD
 cryptography-course-simulator/
 ├── backend/                       # FastAPI application
 │   ├── app/
-│   │   ├── algorithms/            # 35 algorithm modules + registry.py (source of truth)
+│   │   ├── algorithms/            # 47 algorithm modules + registry.py (source of truth)
 │   │   ├── api/routes/            # REST endpoints under /api (api.py)
 │   │   ├── core/                  # settings, logging, security (CORS)
 │   │   ├── schemas/               # Pydantic request/response models
@@ -533,12 +547,13 @@ docker compose down
 - **Location:** `backend/tests/` — `algorithms/` (per-category vector and
   round-trip tests), `api/` (endpoints, catalog, math, exercises, quizzes),
   `integration/` (full API round-trips).
-- **Status:** **283 tests, all passing** — verified in the latest run (`283
-  passed`). The suite checks known test vectors (FIPS-197 AES, DES official
-  vectors, RFC 8439 ChaCha20, RFC 4231 HMAC, RFC 5869 HKDF, RFC 7914 scrypt,
-  official BLAKE3 / Twofish vectors, SHA-2/3 vs `hashlib`, …), encrypt → decrypt
-  round-trips, tamper detection for AEAD and signatures, key properties, and API
-  behavior.
+- **Status:** **669 passed, 1 skipped** — verified in the latest run. The
+  suite checks known test vectors (FIPS-197 AES, DES official vectors, RFC 8439
+  ChaCha20 / Poly1305, RFC 4231 HMAC, RFC 5869 HKDF, RFC 7914 scrypt, AES-CMAC
+  SP 800-38B vectors, AES-CCM SP 800-38C vectors, RSA-PSS / DSA known-answer
+  pairs, official BLAKE3 / Twofish vectors, SHA-224/384/160 vs `hashlib`, …),
+  encrypt → decrypt round-trips, tamper detection for AEAD and signatures, key
+  properties, and API behavior.
 
 ```powershell
 cd backend

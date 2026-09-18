@@ -1,4 +1,5 @@
 import type { AlgorithmDescriptor, AlgorithmField, Category, SecurityStatus } from '../types'
+import { CAPABILITIES, emptyCapabilities } from './capabilities'
 
 export interface StaticAlgorithm extends AlgorithmDescriptor {
   invented: string
@@ -40,6 +41,7 @@ const base = (
   fields,
   theory: { ar: { paragraphs: [] }, en: { paragraphs: [] } },
   ...meta,
+  capabilities: CAPABILITIES[id] ?? emptyCapabilities,
 })
 
 export const ALGORITHMS: StaticAlgorithm[] = [
@@ -553,6 +555,224 @@ export const ALGORITHMS: StaticAlgorithm[] = [
     formula: 'BLAKE2s rounds over a Merkle tree of chunks',
     invented: 'O\'Connor, Aumasson, Neves & Wilcox-O\'Hearn (2020)',
   }),
+  base('sha224', 'SHA-224', 'hashing', ['hash'], [
+    field('message', 'textarea', 'Message', { placeholder: 'Hello, cryptography!' }),
+  ], {
+    security_status: 'secure',
+    reversible: false,
+    key_kind: 'none',
+    block_size: '512-bit blocks',
+    description: 'Truncated SHA-2 variant producing a 224-bit digest with a distinct initial value (FIPS 180-4).',
+    formula: 'SHA-256 compression (64 rounds), truncated to 224 bits',
+    invented: 'NIST (SHA-2 family, 2001)',
+  }),
+  base('sha384', 'SHA-384', 'hashing', ['hash'], [
+    field('message', 'textarea', 'Message', { placeholder: 'Hello, cryptography!' }),
+  ], {
+    security_status: 'secure',
+    reversible: false,
+    key_kind: 'none',
+    block_size: '1024-bit blocks',
+    description: 'Truncated SHA-512 variant producing a 384-bit digest with a distinct initial value (FIPS 180-4).',
+    formula: 'SHA-512 compression (80 rounds), truncated to 384 bits',
+    invented: 'NIST (SHA-2 family, 2001)',
+  }),
+  base('ripemd160', 'RIPEMD-160', 'hashing', ['hash'], [
+    field('message', 'textarea', 'Message', { placeholder: 'Hello, cryptography!' }),
+  ], {
+    security_status: 'deprecated',
+    reversible: false,
+    key_kind: 'none',
+    block_size: '512-bit blocks',
+    description: '160-bit hash from the European RIPE project, used in Bitcoin addresses. Legacy — prefer SHA-256/SHA-3.',
+    formula: 'dual-line compression, 5 rounds × 16 steps (160-bit state)',
+    invented: 'Dobbertin, Bosselaers & Preneel (1996)',
+  }),
+  base('aes_cbc', 'AES-CBC', 'symmetric', ['encrypt', 'decrypt'], [
+    field('plaintext', 'textarea', 'Plaintext', { placeholder: 'Hello, world!' }),
+    field('ciphertext_hex', 'textarea', 'Ciphertext (hex)', {
+      placeholder: 'hex ciphertext (multiple of 16 bytes)',
+      required: false,
+    }),
+    field('key_hex', 'text', 'Key (32/48/64 hex digits)', {
+      placeholder: '000102030405060708090A0B0C0D0E0F',
+    }),
+    field('iv_hex', 'text', 'IV (32 hex digits)', {
+      placeholder: '101112131415161718191A1B1C1D1E1F',
+    }),
+  ], {
+    security_status: 'secure_with_padding',
+    reversible: true,
+    key_kind: '128/192/256-bit key (hex) + 128-bit IV',
+    block_size: '128-bit blocks (PKCS#7 padded)',
+    description: 'AES in Cipher Block Chaining mode: each block is XORed with the previous ciphertext. Confidentiality only — must be combined with a MAC.',
+    formula: 'Cᵢ = E_K(Pᵢ ⊕ Cᵢ₋₁), C₀ = IV',
+    invented: 'Daemen & Rijmen (AES); CBC standardized in NIST SP 800-38A (2001)',
+  }),
+  base('aes_ctr', 'AES-CTR', 'symmetric', ['encrypt', 'decrypt'], [
+    field('plaintext', 'textarea', 'Plaintext', { placeholder: 'Hello, world!' }),
+    field('ciphertext_hex', 'textarea', 'Ciphertext (hex)', {
+      placeholder: 'hex ciphertext (same length as plaintext)',
+      required: false,
+    }),
+    field('key_hex', 'text', 'Key (32/48/64 hex digits)', {
+      placeholder: '000102030405060708090A0B0C0D0E0F',
+    }),
+    field('counter_hex', 'text', 'Counter block (32 hex digits)', {
+      placeholder: 'F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF',
+    }),
+  ], {
+    security_status: 'secure_with_auth',
+    reversible: true,
+    key_kind: '128/192/256-bit key (hex) + 128-bit counter block',
+    block_size: 'stream (128-bit counter)',
+    description: 'AES in counter mode: AES encrypts an incrementing counter to form a keystream XORed with the data. The counter must never repeat under one key.',
+    formula: 'Keystreamᵢ = E_K(IV + i); Cᵢ = Pᵢ ⊕ Keystreamᵢ',
+    invented: 'Counter mode: Diffie & Hellman (1979); NIST SP 800-38A (2001)',
+  }),
+  base('aes_ccm', 'AES-CCM', 'aead', ['encrypt', 'decrypt'], [
+    field('plaintext', 'textarea', 'Plaintext', { placeholder: 'Hello, world!' }),
+    field('ciphertext_hex', 'textarea', 'Ciphertext (hex, ciphertext+tag)', {
+      placeholder: 'hex ciphertext (incl. tag)',
+      required: false,
+    }),
+    field('key_hex', 'text', 'Key (32/48/64 hex digits)', {
+      placeholder: '000102030405060708090A0B0C0D0E0F',
+    }),
+    field('nonce_hex', 'text', 'Nonce (14–26 hex digits)', {
+      placeholder: '00112233445566',
+    }),
+    field('aad', 'textarea', 'AAD (optional, authenticated)', { required: false, default: '' }),
+    field('tag_length', 'select', 'Tag length (bytes)', {
+      options: ['16', '14', '12', '10', '8', '6', '4'],
+      default: '16',
+    }),
+  ], {
+    security_status: 'secure',
+    reversible: true,
+    key_kind: '128/192/256-bit key (hex) + 7–13-byte nonce',
+    block_size: '128-bit blocks (CTR + CBC-MAC)',
+    description: 'Authenticated encryption (NIST SP 800-38C): CTR-mode encryption with a CBC-MAC tag. Detects tampering and authenticates optional AAD.',
+    formula: 'C = CTR-mode AES; τ = CBC-MAC(AAD, C), truncated',
+    invented: 'Whiting, Housley & Ferguson (2002); NIST SP 800-38C',
+  }),
+  base('camellia', 'Camellia', 'symmetric', ['encrypt', 'decrypt'], [
+    field('block', 'text', 'Block (32 hex digits)', {
+      default: '00112233445566778899AABBCCDDEEFF',
+      placeholder: '00112233445566778899AABBCCDDEEFF',
+    }),
+    field('key', 'text', 'Key (32/48/64 hex digits)', {
+      default: '0123456789ABCDEFFEDCBA9876543210',
+      placeholder: '0123456789ABCDEFFEDCBA9876543210',
+    }),
+  ], {
+    security_status: 'secure',
+    reversible: true,
+    key_kind: '128 / 192 / 256 bits (hex)',
+    block_size: '128 bits',
+    description: '128-bit Feistel block cipher (RFC 3713) with 18/24 rounds, recommended by NESSIE and CRYPTREC and used in TLS. Only one block is processed here.',
+    formula: 'Feistel: F = S1..S4 then P; 18 or 24 rounds',
+    invented: 'Matsui et al. (NTT & Mitsubishi, 2000), RFC 3713',
+  }),
+  base('cmac', 'CMAC', 'mac', ['sign', 'verify'], [
+    field('message', 'textarea', 'Message', { placeholder: 'Important message' }),
+    field('key_hex', 'text', 'AES key (hex)', {
+      placeholder: '2B7E151628AED2A6ABF7158809CF4F3C',
+    }),
+    field('output_format', 'select', 'MAC encoding', { options: ['hex', 'base64'], default: 'hex' }),
+    field('mac', 'text', 'Provided MAC (for verify)', { required: false, placeholder: 'hex/base64 MAC to check' }),
+  ], {
+    security_status: 'secure',
+    reversible: false,
+    key_kind: '128/192/256-bit AES key (hex)',
+    block_size: '128 bits (AES)',
+    description: 'Cipher-based MAC (NIST SP 800-38B) with secret subkeys K1/K2 masking the final block. Proves integrity and authenticity with a shared key; it does not encrypt.',
+    formula: 'M_last ⊕ K1/K2 → CBC-MAC → 128-bit tag',
+    invented: 'NIST SP 800-38B (2005), based on Rijndael CBC-MAC',
+  }),
+  base('poly1305', 'Poly1305', 'mac', ['sign', 'verify'], [
+    field('message', 'textarea', 'Message', { placeholder: 'Important message' }),
+    field('key_hex', 'text', 'One-time key (64 hex digits = r ‖ s)', {
+      placeholder: '85D6BE7857556D337F4452FE42D506A80103808AFB0DB2FD4ABFF6AF4149F51B',
+    }),
+    field('output_format', 'select', 'MAC encoding', { options: ['hex', 'base64'], default: 'hex' }),
+    field('mac', 'text', 'Provided MAC (for verify)', { required: false, placeholder: 'hex/base64 MAC to check' }),
+  ], {
+    security_status: 'secure_with_auth',
+    reversible: false,
+    key_kind: '256-bit one-time key (32 bytes hex = r ‖ s)',
+    block_size: '16-byte message blocks',
+    description: 'Fast one-time authenticator using polynomial evaluation mod 2¹³⁰ − 5 (used in ChaCha20-Poly1305, RFC 8439). The key must be unique per message.',
+    formula: 'tag = ((Σ (mᵢ + 2¹²⁸)·rⁱ mod 2¹³⁰−5) + s) mod 2¹²⁸',
+    invented: 'Daniel J. Bernstein (2005), RFC 8439',
+  }),
+  base('x448', 'X448', 'key_exchange', ['exchange'], [], {
+    security_status: 'secure_with_auth',
+    reversible: false,
+    key_kind: '56-byte private scalar + 56-byte public key',
+    block_size: '—',
+    description: 'RFC 7748 elliptic-curve Diffie–Hellman over Curve448 (x-coordinate only) targeting ~224-bit security; the conservative sibling of X25519.',
+    formula: 's = X448(a, B) = X448(b, A)',
+    invented: 'Aumasson & Bernstein (2014), RFC 7748',
+  }),
+  base('dsa', 'DSA', 'signature', ['generate_keys', 'sign', 'verify'], [
+    field('message', 'textarea', 'Message', { placeholder: 'Message to sign' }),
+    field('hash_algorithm', 'select', 'Hash algorithm', { options: ['sha256', 'sha384', 'sha512'], default: 'sha256' }),
+    field('key_size', 'select', 'Key size (bits, for generate/sign)', {
+      options: ['2048', '3072', '4096'],
+      default: '2048',
+      required: false,
+    }),
+    field('signature_hex', 'text', 'Signature (hex, for verify)', {
+      required: false,
+      placeholder: 'DER signature from sign',
+    }),
+    field('private_key_pem', 'textarea', 'Private key (PEM, optional)', {
+      required: false,
+      placeholder: '-----BEGIN PRIVATE KEY----- (blank = auto-generate)',
+    }),
+    field('public_key_pem', 'textarea', 'Public key (PEM, for verify)', {
+      required: false,
+      placeholder: '-----BEGIN PUBLIC KEY----- from sign/generate_keys',
+    }),
+  ], {
+    security_status: 'secure',
+    reversible: false,
+    key_kind: 'FIPS 186 domain parameters + private x + public y',
+    block_size: '—',
+    description: 'Digital Signature Algorithm (FIPS 186): signs a hash using discrete logarithms. Authenticates data; it does not encrypt. Prefer ECDSA/EdDSA for new systems.',
+    formula: 'r = (gᵏ mod p) mod q; s = k⁻¹(H(m) + x·r) mod q',
+    invented: 'NIST FIPS 186 (1994), from ElGamal & Schnorr',
+  }),
+  base('rsa_pss', 'RSA-PSS', 'signature', ['generate_keys', 'sign', 'verify'], [
+    field('message', 'textarea', 'Message', { placeholder: 'Message to sign' }),
+    field('hash_algorithm', 'select', 'Hash algorithm', { options: ['sha256', 'sha384', 'sha512'], default: 'sha256' }),
+    field('key_size', 'select', 'Key size (bits, for generate/sign)', {
+      options: ['2048', '3072', '4096'],
+      default: '2048',
+      required: false,
+    }),
+    field('signature_hex', 'text', 'Signature (hex, for verify)', {
+      required: false,
+      placeholder: 'hex signature from sign',
+    }),
+    field('private_key_pem', 'textarea', 'Private key (PEM, optional)', {
+      required: false,
+      placeholder: '-----BEGIN PRIVATE KEY----- (blank = auto-generate)',
+    }),
+    field('public_key_pem', 'textarea', 'Public key (PEM, for verify)', {
+      required: false,
+      placeholder: '-----BEGIN PUBLIC KEY----- from sign/generate_keys',
+    }),
+  ], {
+    security_status: 'secure',
+    reversible: false,
+    key_kind: 'RSA key pair (2048 / 3072 / 4096 bits)',
+    block_size: '—',
+    description: 'RSA with the Probabilistic Signature Scheme (RFC 8017). The hash is salted into the PSS encoding, making signatures randomized and provably secure. This is a signature scheme, not RSA encryption.',
+    formula: 's = (EMSA-PSS-encode(H(m), salt))ᵈ mod n',
+    invented: 'Bellare & Rogaway (1996); RFC 8017 (2016)',
+  }),
 ]
 
 export const CATEGORIES_ORDER: Category[] = [
@@ -591,6 +811,8 @@ export function operationFormFields(
       elgamal: ['p', 'g', 'x'],
       ecdsa: ['curve'],
       ed25519: [],
+      dsa: ['key_size'],
+      rsa_pss: ['key_size'],
     }
     const names = keep[id] ?? []
     return fields.filter((f) => names.includes(f.name)).map((f) => ({ ...f, required: true }))
@@ -607,7 +829,15 @@ export function operationFormFields(
     return fields.filter((f) => !['c1', 'c2'].includes(f.name))
   }
 
-  if (id === 'aes_gcm' || id === 'chacha20_poly1305') {
+  if (id === 'aes_gcm' || id === 'chacha20_poly1305' || id === 'aes_ccm') {
+    const hidden = op === 'encrypt' ? ['ciphertext_hex'] : ['plaintext']
+    return fields.filter((f) => !hidden.includes(f.name)).map((f) =>
+      op === 'encrypt' && f.name === 'plaintext' ? { ...f, required: true } :
+      op === 'decrypt' && f.name === 'ciphertext_hex' ? { ...f, required: true } : f,
+    )
+  }
+
+  if (id === 'aes_cbc' || id === 'aes_ctr') {
     const hidden = op === 'encrypt' ? ['ciphertext_hex'] : ['plaintext']
     return fields.filter((f) => !hidden.includes(f.name)).map((f) =>
       op === 'encrypt' && f.name === 'plaintext' ? { ...f, required: true } :
@@ -619,6 +849,13 @@ export function operationFormFields(
     if (op === 'sign') return fields.filter((f) => f.name !== 'mac')
     return fields.filter((f) =>
       ['message', 'key', 'algorithm', 'output_format', 'mac'].includes(f.name),
+    )
+  }
+
+  if (id === 'cmac' || id === 'poly1305') {
+    if (op === 'sign') return fields.filter((f) => f.name !== 'mac')
+    return fields.filter((f) =>
+      ['message', 'key_hex', 'output_format', 'mac'].includes(f.name),
     )
   }
 
@@ -656,6 +893,21 @@ export function operationFormFields(
         : fields.filter((f) =>
             ['message', 'signature_hex', 'public_hex'].includes(f.name),
           ).map((f) => ({ ...f, required: true }))
+    }
+  }
+
+  if (id === 'dsa' || id === 'rsa_pss') {
+    if (op === 'sign') {
+      return fields.filter((f) =>
+        ['message', 'hash_algorithm', 'key_size', 'private_key_pem'].includes(f.name),
+      )
+    }
+    if (op === 'verify') {
+      return fields
+        .filter((f) =>
+          ['message', 'hash_algorithm', 'signature_hex', 'public_key_pem'].includes(f.name),
+        )
+        .map((f) => ({ ...f, required: true }))
     }
   }
 

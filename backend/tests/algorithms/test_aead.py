@@ -2,7 +2,7 @@
 
 import pytest
 
-from backend.app.algorithms import aes_gcm, chacha20_poly1305
+from backend.app.algorithms import aes_ccm, aes_gcm, chacha20_poly1305
 from backend.app.utils.errors import ValidationError
 
 KEY_128 = "00" * 16
@@ -64,6 +64,60 @@ class TestAESGCM:
         enc = aes_gcm.encrypt("رسالة سرية", KEY_256, NONCE)
         dec = aes_gcm.decrypt(enc["extra"]["combined_hex"], KEY_256, NONCE)
         assert dec["extra"]["plaintext"] == "رسالة سرية"
+
+
+class TestAESCCM:
+    NONCE_CCM = "cafebabefacedbaddecaf888"  # 12 bytes / 24 hex
+
+    def test_roundtrip(self):
+        enc = aes_ccm.encrypt("Hello, CCM!", KEY_256, self.NONCE_CCM, aad="hdr")
+        assert isinstance(enc["result"], dict)
+        assert enc["extra"]["ciphertext_hex"]
+        assert len(enc["extra"]["tag_hex"]) == 32
+        dec = aes_ccm.decrypt(enc["extra"]["combined_hex"], KEY_256,
+                              self.NONCE_CCM, aad="hdr")
+        assert dec["extra"]["plaintext"] == "Hello, CCM!"
+        assert dec["extra"]["authentication"] == "PASS"
+
+    def test_different_nonce_changes_ciphertext(self):
+        a = aes_ccm.encrypt("fixed", KEY_128, self.NONCE_CCM)["extra"]["ciphertext_hex"]
+        b = aes_ccm.encrypt("fixed", KEY_128, "00" * 12)["extra"]["ciphertext_hex"]
+        assert a != b
+
+    def test_tampered_ciphertext_rejected(self):
+        enc = aes_ccm.encrypt("secret", KEY_256, self.NONCE_CCM)
+        combined = enc["extra"]["combined_hex"]
+        flipped = ("0" if combined[0] != "0" else "1") + combined[1:]
+        with pytest.raises(ValidationError) as exc:
+            aes_ccm.decrypt(flipped, KEY_256, self.NONCE_CCM)
+        assert exc.value.code == "authentication_failed"
+
+    def test_wrong_key_rejected(self):
+        enc = aes_ccm.encrypt("secret", KEY_256, self.NONCE_CCM)
+        with pytest.raises(ValidationError):
+            aes_ccm.decrypt(enc["extra"]["combined_hex"], "bb" * 32,
+                            self.NONCE_CCM)
+
+    def test_wrong_aad_rejected(self):
+        enc = aes_ccm.encrypt("secret", KEY_256, self.NONCE_CCM, aad="a1")
+        with pytest.raises(ValidationError):
+            aes_ccm.decrypt(enc["extra"]["combined_hex"], KEY_256,
+                            self.NONCE_CCM, aad="a2")
+
+    def test_short_tag_supported(self):
+        enc = aes_ccm.encrypt("secret", KEY_128, self.NONCE_CCM, tag_length=8)
+        assert len(enc["extra"]["tag_hex"]) == 16
+        dec = aes_ccm.decrypt(enc["extra"]["combined_hex"], KEY_128,
+                              self.NONCE_CCM, tag_length=8)
+        assert dec["extra"]["plaintext"] == "secret"
+
+    def test_invalid_tag_length_rejected(self):
+        with pytest.raises(ValidationError):
+            aes_ccm.encrypt("hi", KEY_128, self.NONCE_CCM, tag_length=7)
+
+    def test_invalid_nonce_length_rejected(self):
+        with pytest.raises(ValidationError):
+            aes_ccm.encrypt("hi", KEY_128, "00" * 6)
 
 
 class TestChaCha20Poly1305:

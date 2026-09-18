@@ -1,1 +1,0 @@
-import{j as s}from"./index-Bdc5hhzE.js";function l({title:r,subtitle:a,children:c,actions:e,hoverable:n,className:o=""}){const d=["card",n?"card-hover":"",o].filter(Boolean).join(" ");return s.jsxs("section",{className:d,children:[r&&s.jsx("h3",{className:"card-title",children:r}),a&&s.jsx("p",{className:"card-sub",children:a}),e,c]})}export{l as C};

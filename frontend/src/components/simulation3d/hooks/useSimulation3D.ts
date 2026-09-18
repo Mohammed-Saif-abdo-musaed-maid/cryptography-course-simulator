@@ -93,6 +93,7 @@ export function useSimulation3DSource(
       theme,
       result,
       resultMatches,
+      trace: result?.steps ?? [],
       t,
     }),
     [adapter, id, operation, inputs, demo, language, dir, theme, result, resultMatches, t],

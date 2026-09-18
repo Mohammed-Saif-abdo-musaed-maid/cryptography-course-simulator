@@ -13,7 +13,7 @@ Vercel (frontend React + Vite)
 Render (FastAPI backend)
      │
      ▼
-Cryptography Engine (35 algorithms)
+Cryptography Engine (47 algorithms)
 ```
 
 > Facts verified against this repository: frontend = React 18 + TypeScript +

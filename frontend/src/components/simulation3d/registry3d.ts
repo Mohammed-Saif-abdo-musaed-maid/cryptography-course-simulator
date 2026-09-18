@@ -16,6 +16,7 @@ import { aesGcm3DAdapter } from './adapters/aesGcm3D'
 import { chacha20Poly13053DAdapter } from './adapters/chacha20Poly13053D'
 import { sha256Adapter } from './adapters/sha2563D'
 import { sha512Adapter } from './adapters/sha5123D'
+import { sha224Adapter, sha384Adapter, ripemd160Adapter } from './adapters/hashFamily3D'
 import { sha1Adapter } from './adapters/sha13D'
 import { md5Adapter } from './adapters/md53D'
 import { sha3Adapter } from './adapters/sha33D'
@@ -34,6 +35,15 @@ import { x25519Adapter } from './adapters/x255193D'
 import { ecdsaAdapter } from './adapters/ecdsa3D'
 import { ed25519Adapter } from './adapters/ed255193D'
 import { diffieHellmanAdapter } from './adapters/diffieHellman3D'
+import { aesCbc3DAdapter } from './adapters/aesCbc3D'
+import { aesCtr3DAdapter } from './adapters/aesCtr3D'
+import { aesCcm3DAdapter } from './adapters/aesCcm3D'
+import { camellia3DAdapter } from './adapters/camellia3D'
+import { cmac3DAdapter } from './adapters/cmac3D'
+import { poly13053DAdapter } from './adapters/poly13053D'
+import { x4483DAdapter } from './adapters/x4483D'
+import { dsa3DAdapter } from './adapters/dsa3D'
+import { rsaPss3DAdapter } from './adapters/rsaPss3D'
 
 /**
  * Registry of algorithms that ship a 3D simulation. Adding a new 3D
@@ -57,7 +67,19 @@ const REGISTRY: Record<string, Simulation3DAdapter> = {
   [chacha20Poly13053DAdapter.id]: chacha20Poly13053DAdapter,
   [sha256Adapter.id]: sha256Adapter,
   [sha512Adapter.id]: sha512Adapter,
+  [sha224Adapter.id]: sha224Adapter,
+  [sha384Adapter.id]: sha384Adapter,
+  [ripemd160Adapter.id]: ripemd160Adapter,
   [sha1Adapter.id]: sha1Adapter,
+  [aesCbc3DAdapter.id]: aesCbc3DAdapter,
+  [aesCtr3DAdapter.id]: aesCtr3DAdapter,
+  [aesCcm3DAdapter.id]: aesCcm3DAdapter,
+  [camellia3DAdapter.id]: camellia3DAdapter,
+  [cmac3DAdapter.id]: cmac3DAdapter,
+  [poly13053DAdapter.id]: poly13053DAdapter,
+  [x4483DAdapter.id]: x4483DAdapter,
+  [dsa3DAdapter.id]: dsa3DAdapter,
+  [rsaPss3DAdapter.id]: rsaPss3DAdapter,
   [md5Adapter.id]: md5Adapter,
   [sha3Adapter.id]: sha3Adapter,
   [blake2Adapter.id]: blake2Adapter,

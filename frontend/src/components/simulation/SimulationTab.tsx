@@ -89,6 +89,7 @@ export function SimulationTab({
       theme,
       result,
       resultMatches,
+      trace: result?.steps ?? [],
       t,
     }),
     [engine, id, operation, inputs, demo, language, dir, theme, result, resultMatches, t],

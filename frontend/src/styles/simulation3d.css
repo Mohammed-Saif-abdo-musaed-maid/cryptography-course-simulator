@@ -255,6 +255,23 @@
   flex-wrap: wrap;
   gap: 6px;
 }
+.sim3d-source {
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.sim3d-source-backend {
+  background: var(--simulation-output-bg, transparent);
+  color: var(--output-fg, var(--success, #1f9d55));
+}
+.sim3d-source-educational {
+  background: var(--simulation-muted-bg, transparent);
+  color: var(--muted-fg, var(--text-faint));
+}
 .sim3d-inspector-label {
   font-size: var(--fs-xs);
   font-weight: 700;
@@ -329,6 +346,10 @@
   text-decoration: line-through;
   text-decoration-color: var(--error, #c0392b);
   opacity: 0.85;
+  max-width: 38ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .sim3d-arrow {
   color: var(--text-faint);
@@ -337,6 +358,10 @@
 .sim3d-after {
   color: var(--output-fg, var(--green, #27ae60));
   font-weight: 700;
+  max-width: 38ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .sim3d-reason {
   color: var(--text-faint);
@@ -369,6 +394,47 @@
   color: var(--text-strong);
   text-align: right;
   overflow-wrap: anywhere;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 62%;
+}
+.sim3d-kv-text {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  direction: ltr;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sim3d-kv-val.is-open .sim3d-kv-text {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+.sim3d-copy {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 5px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex: none;
+}
+.sim3d-copy:hover {
+  color: var(--primary);
+  border-color: var(--primary);
 }
 .sim3d-inspector-state {
   display: flex;

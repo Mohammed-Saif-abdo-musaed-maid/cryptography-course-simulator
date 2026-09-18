@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect, Suspense, lazy } from 'react'
 import { ALGORITHMS, byId, operationFormFields } from '../../data/catalog'
 import type { AlgorithmExample } from '../../data/examples'
 import { operationLabels } from '../../data/grouping'
+import { labTabLabelKey, labTabsFor } from '../../data/labTabs'
 import { useI18n } from '../../i18n'
 import { Alert } from '../ui/Alert'
 import { Button } from '../ui/Button'
@@ -18,6 +19,9 @@ const SecurityTab = lazy(() => import('./SimulatorTabs').then((m) => ({ default:
 const SimulationTab = lazy(() => import('../simulation/SimulationTab').then((m) => ({ default: m.SimulationTab })))
 const Simulation3DTab = lazy(() =>
   import('../simulation3d/Simulation3DTab').then((m) => ({ default: m.Simulation3DTab })),
+)
+const LabPanel = lazy(() =>
+  import('../lab/LabPanel').then((m) => ({ default: m.LabPanel })),
 )
 
 const INVENTED: Record<string, string> = {
@@ -56,6 +60,18 @@ const INVENTED: Record<string, string> = {
   x25519: '2006',
   ecdsa: '1992',
   ed25519: '2011',
+  sha224: '2001',
+  sha384: '2001',
+  ripemd160: '1996',
+  aes_cbc: '2001',
+  aes_ctr: '1979 / 2001',
+  aes_ccm: '2002',
+  camellia: '2000',
+  cmac: '2005',
+  poly1305: '2005',
+  x448: '2014',
+  dsa: '1994',
+  rsa_pss: '1996',
 }
 
 export function AlgorithmPage({ id }: { id: string }) {
@@ -79,9 +95,19 @@ export function AlgorithmPage({ id }: { id: string }) {
   }, [id, supportedOps, sim.operation])
 
   const [values, setValues] = useState<Record<string, unknown>>({})
-  const [tab, setTab] = useState<
-    'simulator' | 'theory' | 'examples' | 'simulation' | 'security' | 'simulation3d'
-  >('simulator')
+  const [tab, setTab] = useState<string>('simulator')
+
+  // Laboratory tabs are derived purely from the backend capability model.
+  const labTabs = useMemo(() => labTabsFor(alg?.capabilities), [alg])
+
+  // When navigating between algorithms (the router reuses this instance),
+  // keep the current tab only if the new algorithm still exposes it.
+  useEffect(() => {
+    const baseTabs = ['simulator', 'theory', 'examples', 'simulation', 'simulation3d', 'security']
+    if (!baseTabs.includes(tab) && !labTabs.includes(tab as (typeof labTabs)[number])) {
+      setTab('simulator')
+    }
+  }, [id, labTabs, tab])
 
   const operations = useMemo(() => operationLabels(id), [id])
   const formFields = useMemo(
@@ -130,6 +156,7 @@ export function AlgorithmPage({ id }: { id: string }) {
           { id: 'simulation', label: t('algorithm.tabs.simulation') },
           { id: 'simulation3d', label: t('algorithm.tabs.simulation3d') },
           { id: 'security', label: t('algorithm.tabs.documentation') },
+          ...labTabs.map((labTab) => ({ id: labTab, label: t(labTabLabelKey(labTab)) })),
         ].map((tk) => (
           <button
             key={tk.id}
@@ -137,9 +164,7 @@ export function AlgorithmPage({ id }: { id: string }) {
             role="tab"
             aria-selected={tab === tk.id}
             className={`tab ${tab === tk.id ? 'tab-active' : ''}`}
-            onClick={() =>
-              setTab(tk.id as 'simulator' | 'theory' | 'examples' | 'simulation' | 'security' | 'simulation3d')
-            }
+            onClick={() => setTab(tk.id)}
           >
             {tk.label}
           </button>
@@ -233,6 +258,12 @@ export function AlgorithmPage({ id }: { id: string }) {
             <SecurityTab id={id} />
           </Suspense>
         </Card>
+      )}
+
+      {labTabs.includes(tab as (typeof labTabs)[number]) && (
+        <Suspense fallback={<Spinner />}>
+          <LabPanel tabId={tab as (typeof labTabs)[number]} algorithmId={id} />
+        </Suspense>
       )}
     </div>
   )
